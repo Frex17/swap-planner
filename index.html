@@ -67,8 +67,9 @@
   .rtitle{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.07em;
     font-weight:700;font-size:15px;color:var(--night);display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
   .rcount{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
-  .ritem{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13.5px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .ritem{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:nowrap}
   .ritem:first-of-type{border-top:0}
+  .ritem .rl{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ritem.pend{background:var(--amber-bg);border-radius:7px;padding:7px 9px;border-top:0;margin:4px 0}
   .rwait{font-weight:700;color:#9a6f1f}
   .rswap{font-weight:700;color:var(--green)}
@@ -111,12 +112,12 @@
   .ptag{font-family:"Barlow Condensed",sans-serif;font-size:11.5px;font-weight:700;color:var(--clash);text-transform:uppercase;letter-spacing:.08em}
   .ptag.t{color:var(--accent)}
 
-  .cand{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #EFF0EB;flex-wrap:wrap}
+  .cand{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #EFF0EB;flex-wrap:nowrap}
   .cand:first-of-type{border-top:0}
-  .cname{font-size:13.5px;font-weight:600}
+  .cname{font-size:13.5px;font-weight:600;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cname .role{font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:500;color:#98A1AD;margin-left:5px;letter-spacing:.02em}
-  .cact{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
-  .mini{border:0;cursor:pointer;font-weight:700;font-size:12px;border-radius:6px;padding:6px 10px;line-height:1;font-family:"IBM Plex Sans",sans-serif}
+  .cact{display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:nowrap;justify-content:flex-end}
+  .mini{border:0;cursor:pointer;font-weight:700;font-size:12px;border-radius:6px;padding:6px 8px;line-height:1;font-family:"IBM Plex Sans",sans-serif}
   .mini.ok{background:var(--green-bg);color:var(--green)}
   .mini.no{background:var(--red-bg);color:var(--red)}
   .mini.pend{background:var(--amber-bg);color:#9a6f1f}
@@ -351,16 +352,15 @@ function extraEarlies(partnerRoster){
   const srcR=norm16(partnerRoster+8);
   return (ROSTER_PEOPLE[srcR]||[]).filter(p=>p[2]==="soloE").map(p=>({srcRoster:srcR,name:p[0],role:p[1],flag:p[2]}));
 }
-/* PT: lavora solo il suo blocco (early: fasi 0-4, late: fasi 8-12), 11 off.
-   Può coprire qualsiasi tipo di turno. Regola rest (~2,5 giorni ≈ 60h), a giorni:
-   disponibile in tutti gli off TRANNE il 2° giorno dopo la fine del blocco
-   e il 2° giorno prima dell'inizio del successivo. */
+/* PT: lavora solo il suo blocco (early: fasi 0-4, late: fasi 8-12), poi 11 off.
+   Disponibile SOLO nei giorni off di riferimento, come un full-time:
+   1° e 3° giorno dopo la fine del SUO blocco. Gli altri off restano loro. */
 function ptAvailable(roster,flag,day){
   const p=phaseOf(roster,day);
   if(flag==="ptE"&&p<=4)return false;            // sta lavorando il suo blocco early
   if(flag==="ptL"&&p>=8&&p<=12)return false;     // sta lavorando il suo blocco late
   const k=mod(p-(flag==="ptE"?4:12),16);         // giorni dalla fine del blocco (1..11)
-  return k!==2&&k!==10;
+  return k===1||k===3;
 }
 function ptCandidates(dutyType,day){
   const grp=groupNames(),out=[];
@@ -556,13 +556,18 @@ function fillEventInputs(){
 }
 
 /* ---------- rendering ---------- */
+function shortName(n){
+  const parts=n.split(" ");
+  if(parts.length===1)return n;
+  return parts[0]+" "+parts.slice(1).map(w=>w[0]+".").join(" ");
+}
 function roleText(c){
-  if(c.pt)return "R"+String(c.roster).padStart(2,"0")+" · PT "+(c.pt==="ptE"?"early":"late");
-  if(c.soloE)return "R"+c.srcRoster+" · solo earlies";
+  if(c.pt)return "R"+String(c.roster).padStart(2,"0")+" PT";
+  if(c.soloE)return "R"+c.srcRoster+" solo E";
   return c.role;
 }
 function candHTML(c,friend,day){
-  const nm=`<span class="cname">${c.name}<span class="role">${roleText(c)}</span></span>`;
+  const nm=`<span class="cname">${shortName(c.name)}<span class="role">${roleText(c)}</span></span>`;
   if(c.lock){
     const lbl=c.lock==="group"?"nel gruppo ✈":"solo lates";
     return `<div class="cand locked">${nm}<span class="cact"><span class="state lock">${lbl}</span></span></div>`;
@@ -613,7 +618,7 @@ function workerEntryHTML(w,d,shared){
   const av=availableCount(w.f,w.partners,w.st.type,d);
   let h=`<div class="whead"><span class="who">${w.f.name||w.f.code}</span>
     <span class="pill ${w.st.type}">${w.st.type==='early'?'EARLY':'LATE'} G${w.st.day}</span>`;
-  if(pend.length)h+=`<span class="pill pendp">⏳ ${pend.map(p=>p.name).join(", ")}</span>`;
+  if(pend.length)h+=`<span class="pill pendp">⏳ ${pend.map(p=>shortName(p.name)).join(", ")}</span>`;
   else if(av===0)h+=`<span class="pill warn">nessuno disponibile</span>`;
   h+=`</div>`;
   h+=poolsHTML(w,d,shared);
@@ -659,14 +664,14 @@ function renderRecap(){
   const map={AL:["al","A/L"],VTO:["vto","VTO"],SKIP:["skip","NON SERVE"]};
   const cnt=[pend.length?pend.length+" in attesa":"",done.length?done.length+" presi":""].filter(Boolean).join(" · ");
   let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
-  h+=pend.map(it=>`<div class="ritem pend"><span><b>${it.by}</b> → <span class="rwait">⏳ ${it.name}</span><span class="rmeta"> R${String(it.roster).padStart(2,"0")}${it.d?(" · "+weekday(it.d)+" "+pretty(it.d)):""}</span></span>
+  h+=pend.map(it=>`<div class="ritem pend"><span class="rl"><b>${it.by}</b> → <span class="rwait">⏳ ${shortName(it.name)}</span> <span class="rmeta">R${String(it.roster).padStart(2,"0")} · ${pretty(it.d)}</span></span>
     <span class="cact"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
     <button class="mini no" data-ract="reject" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✕</button></span></div>`).join("");
   h+=done.map(it=>{
-    if(it.kind==="swap")return `<div class="ritem"><span><b>${it.f.name}</b> · ${weekday(it.d)} ${pretty(it.d)} → <span class="rswap">${it.sw.name}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
+    if(it.kind==="swap")return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> · ${pretty(it.d)} → <span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
       <button class="mini undo" data-ract="undoswap" data-r="${it.sw.roster}" data-n="${it.sw.name}" data-d="${it.d}">↩</button></div>`;
     const pair=map[it.k]||["skip",it.k];
-    return `<div class="ritem"><span><b>${it.f.name}</b> · ${weekday(it.d)} ${pretty(it.d)} → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
+    return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> · ${pretty(it.d)} → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
       <button class="mini undo" data-ract="undoleave" data-fi="${it.idx}" data-d="${it.d}">↩</button></div>`;
   }).join("");
   box.innerHTML=h;
@@ -702,9 +707,9 @@ function renderPlan(){
         <span class="tag ${unres.length?'todo':'done'}">${unres.length?unres.length+" da fare":"fatto"}</span></div>`;
       const body=document.createElement("div");body.className="dbody";
       unres.forEach(w=>{const wr=document.createElement("div");wr.className="worker";wr.innerHTML=workerEntryHTML(w,d,shared);body.appendChild(wr);});
-      if(!unres.length)body.insertAdjacentHTML("beforeend",`<div class="free">✓ niente da fare — vedi "Resoconto" in alto</div>`);
+      if(!unres.length)body.insertAdjacentHTML("beforeend",`<div class="free">✓ niente da fare</div>`);
       if(shared.size&&unres.length>1)
-        body.insertAdjacentHTML("beforeend",`<div class="clashnote">⚠ Coordinatevi: roster ${[...shared].sort((a,b)=>a-b).join(", ")} servono a più di una di voi.</div>`);
+        body.insertAdjacentHTML("beforeend",`<div class="clashnote">⚠ Roster ${[...shared].sort((a,b)=>a-b).join(", ")} contesi — dividetevi</div>`);
       el.appendChild(body);box.appendChild(el);
     });
   } else {
