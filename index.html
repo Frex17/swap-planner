@@ -352,24 +352,15 @@ function extraEarlies(partnerRoster){
   return (ROSTER_PEOPLE[srcR]||[]).filter(p=>p[2]==="soloE").map(p=>({srcRoster:srcR,name:p[0],role:p[1],flag:p[2]}));
 }
 /* PT: lavora solo il suo blocco (early: fasi 0-4, late: fasi 8-12), 11 off.
-   Può coprire QUALSIASI tipo di turno purché le 60h siano rispettate.
-   Calcolo orario con orari tipici: early 05:00-16:00, late 13:00-00:30; riposo minimo per
-   attaccare un giorno al blocco: 12h. Validità: il duty si attacca alla fine/inizio del blocco
-   oppure ha ≥60h da entrambi i lati. */
-const SHIFT={E:{start:5,end:16},L:{start:13,end:24.5}};
-function ptDutyOK(roster,flag,day,dutyType){
+   Può coprire qualsiasi tipo di turno. Regola rest (~2,5 giorni ≈ 60h), a giorni:
+   disponibile in tutti gli off TRANNE il 2° giorno dopo la fine del blocco
+   e il 2° giorno prima dell'inizio del successivo. */
+function ptAvailable(roster,flag,day){
   const p=phaseOf(roster,day);
-  const B=flag==="ptE"?"E":"L";
-  if(B==="E"&&p<=4)return false;               // sta lavorando il suo blocco early
-  if(B==="L"&&p>=8&&p<=12)return false;        // sta lavorando il suo blocco late
-  const blockEndPhase=B==="E"?4:12;
-  const k=mod(p-blockEndPhase,16);             // 1..11 = giorni dopo la fine del blocco
-  const T=dutyType==="early"?"E":"L";
-  const prev=24*k+SHIFT[T].start-SHIFT[B].end;            // ore dalla fine del blocco
-  const next=24*(12-k)+SHIFT[B].start-SHIFT[T].end;       // ore all'inizio del prossimo
-  const attachEnd=(k===1)&&(24+SHIFT[T].start-SHIFT[B].end>=12);   // 6° giorno in coda
-  const attachFront=(k===11)&&(24+SHIFT[B].start-SHIFT[T].end>=12);// giorno in testa
-  return attachEnd||attachFront||(prev>=60&&next>=60);
+  if(flag==="ptE"&&p<=4)return false;            // sta lavorando il suo blocco early
+  if(flag==="ptL"&&p>=8&&p<=12)return false;     // sta lavorando il suo blocco late
+  const k=mod(p-(flag==="ptE"?4:12),16);         // giorni dalla fine del blocco (1..11)
+  return k!==2&&k!==10;
 }
 function ptCandidates(dutyType,day){
   const grp=groupNames(),out=[];
@@ -378,7 +369,7 @@ function ptCandidates(dutyType,day){
     ROSTER_PEOPLE[r].forEach(p=>{
       const fl=p[2];
       if(fl!=="ptE"&&fl!=="ptL")return;
-      if(!ptDutyOK(r,fl,day,dutyType))return;
+      if(!ptAvailable(r,fl,day))return;
       const lock=grp.has(p[0])?"group":null;
       out.push({roster:r,name:p[0],role:p[1],pt:fl,lock,dec:lock?null:(decisions[dKey(r,p[0],day)]||null)});
     });
