@@ -78,11 +78,23 @@
   .rpill.al{background:var(--gray-bg);color:var(--gray)}
   .rpill.vto{background:var(--green-bg);color:var(--green)}
   .rpill.skip{background:#F0F1ED;color:#8a93a0}
+  .rsec{margin-top:10px}
+  .rsec-h{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:13px;
+    padding:5px 9px;border-radius:6px;display:inline-block;margin-bottom:4px}
+  .rsec.pend .rsec-h{background:var(--amber-bg);color:#9a6f1f}
+  .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
+  .rday{margin:2px 0 8px}
+  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);padding:5px 0 2px;border-bottom:1px solid #EEF0EB}
 
   .day{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:14px 0;position:relative;box-shadow:0 1px 3px rgba(15,30,49,.06)}
   .dhead{padding:10px 16px 9px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed var(--line)}
   .dhead .dt{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-weight:700;font-size:19px;letter-spacing:.08em;color:var(--night)}
   .dhead .dt small{color:var(--muted);font-size:13px;margin-right:6px}
+  .dhead-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
+  .exbtn{border:1px solid var(--line);background:#fff;color:var(--muted);font-family:"IBM Plex Mono",monospace;
+    font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:5px;cursor:pointer;white-space:nowrap}
+  .exbtn.on{background:var(--night);color:#fff;border-color:var(--night)}
   .tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
   .tag.todo{background:var(--amber-bg);color:#9a6f1f}
   .tag.done{background:var(--green-bg);color:var(--green)}
@@ -289,6 +301,7 @@ let state={
 };
 let decisions={}; // "roster|name|day" -> {status:'pending'|'secured'|'declined', by, day}
 let leaves={};    // "fid|day" -> "AL"|"VTO"|"SKIP"
+let exclDays=new Set(); // giorni in cui mostrare anche gli esclusi (peek, non persistente)
 
 const SKEY="swapplanner.v7";
 function ev(){return state.events.find(e=>e.id===state.cur)||state.events[0];}
@@ -643,10 +656,20 @@ function candHTML(c,friend,day){
   }
   return ""; /* pending: vive nel resoconto */
 }
+function declinedCountForDay(day){
+  let n=0;
+  for(const k in decisions){const v=decisions[k];if(v.status==="declined"&&parseDKey(k).day===day)n++;}
+  return n;
+}
+function effMode(day){
+  if(state.ui.cand!=="active")return state.ui.cand;   // filtro globale ha priorità
+  return exclDays.has(day)?"all":"active";             // peek per-giorno
+}
 function poolsHTML(w,day,shared){
+  const mode=effMode(day);
   function filterMode(all){
-    if(state.ui.cand==="active")return all.filter(c=>c.lock||!c.dec);
-    if(state.ui.cand==="only")return all.filter(c=>c.dec&&c.dec.status!=="pending");
+    if(mode==="active")return all.filter(c=>c.lock||!c.dec);
+    if(mode==="only")return all.filter(c=>c.dec&&c.dec.status!=="pending");
     return all;
   }
   let h=w.partners.map(r=>{
@@ -714,17 +737,37 @@ function renderRecap(){
   box.style.borderLeftColor=pend.length?"var(--amber)":"var(--green)";
   const map={AL:["al","A/L"],VTO:["vto","VTO"],SKIP:["skip","NON SERVE"]};
   const cnt=[pend.length?pend.length+" in attesa":"",done.length?done.length+" presi":""].filter(Boolean).join(" · ");
-  let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
-  h+=pend.map(it=>`<div class="ritem pend"><span class="rl"><b>${it.by}</b> → <span class="rwait">⏳ ${shortName(it.name)}</span> <span class="rmeta">R${String(it.roster).padStart(2,"0")} · ${pretty(it.d)}</span></span>
-    <span class="cact"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
-    <button class="mini no" data-ract="reject" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✕</button></span></div>`).join("");
-  h+=done.map(it=>{
-    if(it.kind==="swap")return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> · ${pretty(it.d)} → <span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
+
+  // raggruppa per data (in ordine)
+  function byDay(arr){
+    const m={};
+    arr.forEach(it=>{(m[it.d]=m[it.d]||[]).push(it);});
+    return Object.keys(m).sort().map(d=>({d,items:m[d]}));
+  }
+  function pendRow(it){
+    return `<div class="ritem pend"><span class="rl"><b>${it.by}</b> → <span class="rwait">⏳ ${shortName(it.name)}</span> <span class="rmeta">R${String(it.roster).padStart(2,"0")}</span></span>
+      <span class="cact"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
+      <button class="mini no" data-ract="reject" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✕</button></span></div>`;
+  }
+  function doneRow(it){
+    if(it.kind==="swap")return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
       <button class="mini undo" data-ract="undoswap" data-r="${it.sw.roster}" data-n="${it.sw.name}" data-d="${it.d}">↩</button></div>`;
     const pair=map[it.k]||["skip",it.k];
-    return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> · ${pretty(it.d)} → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
+    return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
       <button class="mini undo" data-ract="undoleave" data-fi="${it.idx}" data-d="${it.d}">↩</button></div>`;
-  }).join("");
+  }
+  function section(cls,label,groups,rowFn){
+    if(!groups.length)return "";
+    let s=`<div class="rsec ${cls}"><div class="rsec-h">${label}</div>`;
+    groups.forEach(g=>{
+      s+=`<div class="rday"><div class="rday-h">${weekday(g.d)} ${pretty(g.d)}</div>${g.items.map(rowFn).join("")}</div>`;
+    });
+    return s+`</div>`;
+  }
+
+  let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
+  h+=section("pend","⏳ In attesa",byDay(pend),pendRow);
+  h+=section("done","✓ Presi",byDay(done),doneRow);
   box.innerHTML=h;
   box.querySelectorAll("[data-ract]").forEach(b=>b.onclick=()=>{
     const a=b.dataset.ract;
@@ -754,8 +797,11 @@ function renderPlan(){
       if(personF!==null)ws=ws.filter(w=>w.idx===personF);
       const unres=ws.filter(w=>isWork(w.st)&&!securedSwapFor(w.f.name,d));
       const el=document.createElement("div");el.className="day";
+      const declN=declinedCountForDay(d);
+      const showEx=state.ui.cand==="active"&&declN>0;
+      const exBtn=showEx?`<button class="exbtn ${exclDays.has(d)?'on':''}" data-exday="${d}">${exclDays.has(d)?'nascondi':'esclusi'} ${declN}</button>`:'';
       el.innerHTML=`<div class="dhead"><span class="dt"><small>${weekday(d)}</small>${pretty(d)}</span>
-        <span class="tag ${unres.length?'todo':'done'}">${unres.length?unres.length+" da fare":"fatto"}</span></div>`;
+        <span class="dhead-r">${exBtn}<span class="tag ${unres.length?'todo':'done'}">${unres.length?unres.length+" da fare":"fatto"}</span></span></div>`;
       const body=document.createElement("div");body.className="dbody";
       unres.forEach(w=>{const wr=document.createElement("div");wr.className="worker";wr.innerHTML=workerEntryHTML(w,d,shared);body.appendChild(wr);});
       if(!unres.length)body.insertAdjacentHTML("beforeend",`<div class="free">✓ niente da fare</div>`);
@@ -788,6 +834,12 @@ function renderPlan(){
     });
   }
   if(!box.innerHTML)box.innerHTML='<div class="day"><div class="dbody free">Niente da mostrare con questi filtri.</div></div>';
+
+  box.querySelectorAll(".exbtn").forEach(b=>b.onclick=()=>{
+    const d=b.dataset.exday;
+    if(exclDays.has(d))exclDays.delete(d);else exclDays.add(d);
+    renderPlan();
+  });
 
   box.querySelectorAll(".mini").forEach(b=>{
     b.onclick=()=>{
