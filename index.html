@@ -609,8 +609,10 @@ async function initEventsSync(){
   if(!sb)return;
   try{
     const{data}=await sb.from("swap_events").select("*");
-    // assicura che gli eventi locali esistenti finiscano anche sul cloud (es. Madcool)
-    state.events.forEach(e=>pushEvent(e));
+    const cloudIds=new Set((data||[]).map(r=>r.id));
+    // spingi sul cloud SOLO gli eventi locali nuovi; per quelli già sul cloud vince il cloud
+    // (così un telefono con un dato vecchio non sovrascrive quello buono degli altri)
+    state.events.forEach(e=>{if(!cloudIds.has(e.id))pushEvent(e);});
     if(mergeEvents(data)){saveState();renderFilters();renderPlan();}
     if(evChannel){try{await sb.removeChannel(evChannel);}catch(e){}}
     evChannel=sb.channel("events")
