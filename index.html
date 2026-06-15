@@ -31,7 +31,21 @@
       linear-gradient(165deg,var(--night),var(--night-2));
     color:#fff;padding:18px 16px 16px;border-bottom:3px solid var(--amber);
   }
-  header.top .bar{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  header.top .bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bar-r{display:flex;align-items:center;gap:10px}
+  .hamb{display:flex;flex-direction:column;justify-content:center;gap:4px;width:38px;height:34px;padding:0 8px;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:8px;cursor:pointer}
+  .hamb span{display:block;height:2px;background:#E7EEF6;border-radius:2px}
+  .scrim{position:fixed;inset:0;background:rgba(7,14,24,.5);opacity:0;visibility:hidden;transition:opacity .2s ease;z-index:40}
+  .scrim.open{opacity:1;visibility:visible}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,92vw);background:var(--paper);z-index:50;
+    transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 28px rgba(7,14,24,.25);display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer-h{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;
+    background:linear-gradient(165deg,var(--night),var(--night-2));color:#fff;border-bottom:3px solid var(--amber)}
+  .drawer-t{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:20px}
+  .drawer-x{background:rgba(255,255,255,.12);border:0;color:#fff;font-size:16px;font-weight:700;width:34px;height:34px;border-radius:8px;cursor:pointer}
+  .drawer-b{padding:12px 14px 70px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   header.top h1{margin:0;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-weight:700;font-size:24px;letter-spacing:.08em}
   header.top h1 .pl{color:var(--amber);margin-right:6px}
   .sync{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.05em;
@@ -179,6 +193,15 @@
   table.swap{width:100%;border-collapse:collapse;margin-top:8px;font-family:"IBM Plex Mono",monospace;font-size:11px}
   table.swap th,table.swap td{border:1px solid var(--line);padding:4px;text-align:center}
   table.swap th{background:#F2F3EF;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-size:12.5px;letter-spacing:.05em}
+  .crow{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:8px 0;background:#FBFBF9}
+  .crow-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+  .cperson{display:flex;gap:5px;align-items:center;padding:3px 0;border-top:1px solid #EFF0EB}
+  .cperson:first-of-type{border-top:0}
+  .cperson .cp-name{flex:1 1 auto;min-width:0;padding:6px 8px;font-size:13px}
+  .cperson select{flex:0 0 auto;padding:6px 4px;border:1px solid var(--line);border-radius:7px;font-size:11.5px;font-family:"IBM Plex Sans",sans-serif;background:#fff;color:var(--ink);max-width:38%}
+  .cperson .cp-role{width:74px}
+  .cperson .cp-flag{width:96px}
+  .cperson .cp-del{flex:0 0 auto;padding:6px 8px}
   .swap td.r{background:#F8F9F6;font-weight:600}
   @media (prefers-reduced-motion: no-preference){
     .day{transition:box-shadow .15s ease}
@@ -190,7 +213,10 @@
 <header class="top">
   <div class="bar">
     <h1><span class="pl">✈</span>Swap Planner</h1>
-    <span class="sync" id="sync"><span class="d"></span><span id="syncTxt">offline</span></span>
+    <div class="bar-r">
+      <span class="sync" id="sync"><span class="d"></span><span id="syncTxt">offline</span></span>
+      <button class="hamb" id="hambBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
   </div>
   <p id="evLabel">—</p>
 </header>
@@ -221,8 +247,16 @@
     <span><i class="dot" style="background:var(--gray-bg)"></i>A/L</span>
     <span><i class="dot" style="background:var(--accent-bg);border:1px solid #BFDCDC"></i>PT part-time</span>
   </div>
+</div>
 
-  <details class="panel">
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-h">
+    <span class="drawer-t">Menu</span>
+    <button class="drawer-x" id="drawerX" aria-label="Chiudi">✕</button>
+  </div>
+  <div class="drawer-b">
+  <details class="panel" open>
     <summary>Impostazioni</summary>
     <div class="pcont">
       <label class="fld">Nome evento</label>
@@ -251,7 +285,20 @@
     <summary>Swap Table</summary>
     <div class="pcont"><div id="swapTables"></div></div>
   </details>
-</div>
+
+  <details class="panel">
+    <summary>Roster</summary>
+    <div class="pcont">
+      <p class="hint" style="margin-top:0">Tutti per roster, N1 inclusi. Modificabile: aggiungi chi arriva, togli chi va via. Ruolo e tipo (part-time/flexi) si scelgono dai menu.</p>
+      <div id="crew"></div>
+      <div class="calibrow" style="margin-top:10px">
+        <button class="btn btn-ghost" id="crewReset">↺ Ripristina elenco di base</button>
+        <span class="sync" id="crewSync" style="background:#ECEEF1;color:var(--muted)"><span class="d"></span><span id="crewSyncTxt">solo locale</span></span>
+      </div>
+    </div>
+  </details>
+  </div>
+</aside>
 
 <script>
 /* ====== SUPABASE (configurato) ====== */
@@ -262,7 +309,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
    flag: "flexE"/"flexL" = flexi: stesso roster ma fa solo earlies/lates (dà swap solo di quel tipo)
          "ptE"/"ptL"     = part-time: lavora solo il blocco early/late del suo roster, poi 11 off
    Coppie PT: Bruno(R6,E)+Valerio(R14,L) · Vanessa(R4,E)+Fabio(R12,L) · Cecilia(R14,E)+Gaia(R14,L) ---------- */
-const ROSTER_PEOPLE = {
+const ROSTER_PEOPLE_DEFAULT = {
   1:[["Rodolfo","N1"],["Giuen","Juadhoc"],["Valentina M.","Jupu"],["Corinne","Ju"]],
   2:[["Annalisa","N1"],["Vito Regina","Ju"],["Ivano","Ju"],["Federica Natilla","Ju"]],
   3:[["Donnie","N1"],["Federica Greco","N1"],["Giorgia Bello","Jupu"],["Mariachiara","Juadhoc"],["Viviana","Ju"],["Nicolò","Ju"],["Emanuela","Ju"]],
@@ -283,6 +330,12 @@ const ROSTER_PEOPLE = {
 
 /* nomi-roster che corrispondono a voi 4 */
 const CREW_ALIAS = {SALIFR:"Francesco S.", AVILXI:"Ximena", NUZZMA:"Martina", RUSANG:"Angela"};
+
+/* copia di lavoro modificabile dell'equipaggio base (persone arrivano/vanno) */
+const RKEY="swapplanner.roster";
+let ROSTER_PEOPLE=JSON.parse(JSON.stringify(ROSTER_PEOPLE_DEFAULT));
+function loadRoster(){try{const s=localStorage.getItem(RKEY);if(s){const o=JSON.parse(s);if(o&&typeof o==="object")ROSTER_PEOPLE=o;}}catch(e){}}
+function saveRoster(){try{localStorage.setItem(RKEY,JSON.stringify(ROSTER_PEOPLE));}catch(e){}}
 
 const ANCHOR_DATE="2026-07-06", ANCHOR_ROSTER=7;
 
@@ -509,6 +562,7 @@ async function initSupabase(){
     sbReady=true;setSync(true);
     await connectEvent();
     await initEventsSync();
+    await initRosterSync();
   }catch(e){console.warn("Supabase non attivo:",e);setSync(false);}
 }
 async function pushDecision(r,name,day,d){
@@ -569,6 +623,31 @@ async function initEventsSync(){
         saveState();renderFilters();renderPlan();
       }).subscribe();
   }catch(e){console.warn("Eventi non sincronizzati:",e);}
+}
+
+/* ---- equipaggio base condiviso (tabella swap_roster, una riga id='base') ---- */
+let rosterChannel=null,rosterReady=false;
+function setCrewSync(on){const el=document.getElementById("crewSync");if(!el)return;el.style.background=on?"rgba(30,158,106,.12)":"#ECEEF1";el.style.color=on?"var(--green)":"var(--muted)";const d=el.querySelector(".d");if(d)d.style.background=on?"#3ddc8e":"#7e8da0";document.getElementById("crewSyncTxt").textContent=on?"sincronizzato":"solo locale";}
+async function pushRoster(){
+  if(!rosterReady)return;
+  try{await sb.from("swap_roster").upsert({id:"base",data:JSON.stringify(ROSTER_PEOPLE),updated_at:new Date().toISOString()});}catch(e){console.warn(e);}
+}
+async function initRosterSync(){
+  if(!sb)return;
+  try{
+    const{data,error}=await sb.from("swap_roster").select("*").eq("id","base").maybeSingle();
+    if(error)throw error;
+    rosterReady=true;setCrewSync(true);
+    if(data&&data.data){
+      try{const o=JSON.parse(data.data);if(o&&typeof o==="object"){ROSTER_PEOPLE=o;saveRoster();renderCrew();renderSwapTables();renderFilters();renderPlan();}}catch(e){}
+    }else{await pushRoster();}
+    if(rosterChannel){try{await sb.removeChannel(rosterChannel);}catch(e){}}
+    rosterChannel=sb.channel("roster")
+      .on("postgres_changes",{event:"*",schema:"public",table:"swap_roster"},payload=>{
+        const r=payload.new;if(!r||r.id!=="base"||!r.data)return;
+        try{const o=JSON.parse(r.data);if(o&&typeof o==="object"){ROSTER_PEOPLE=o;saveRoster();renderCrew();renderSwapTables();renderFilters();renderPlan();}}catch(e){}
+      }).subscribe();
+  }catch(e){console.warn("Equipaggio non sincronizzato:",e);setCrewSync(false);}
 }
 
 /* ---------- filtri ---------- */
@@ -906,9 +985,56 @@ function renderSwapTables(){
   wrap.innerHTML=tbl("Early — puoi chiedere a:",(R,d)=>partnersFor(R,{type:"early",day:d}))+tbl("Late — puoi chiedere a:",(R,d)=>partnersFor(R,{type:"late",day:d}));
 }
 
+/* ---------- equipaggio base (modificabile) ---------- */
+const ROLES=["N1","Ju","Jupu","Juadhoc"];
+const FLAGS=[["","—"],["flexE","flexi solo E"],["flexL","flexi solo L"],["ptE","PT early"],["ptL","PT late"]];
+function crewChanged(){saveRoster();pushRoster();renderCrew();renderSwapTables();renderFilters();renderPlan();}
+function renderCrew(){
+  const box=document.getElementById("crew");if(!box)return;
+  let h="";
+  for(let R=1;R<=16;R++){
+    const list=ROSTER_PEOPLE[R]||(ROSTER_PEOPLE[R]=[]);
+    h+=`<div class="crow"><div class="crow-h"><span class="rbadge">R ${String(R).padStart(2,"0")}</span>
+      <button class="mini alx" data-cadd="${R}">+ persona</button></div>`;
+    h+=list.map((p,i)=>{
+      const role=p[1]||"Ju",flag=p[2]||"";
+      const roleOpts=ROLES.map(r=>`<option value="${r}"${r===role?" selected":""}>${r}</option>`).join("");
+      const flagOpts=FLAGS.map(f=>`<option value="${f[0]}"${f[0]===flag?" selected":""}>${f[1]}</option>`).join("");
+      return `<div class="cperson">
+        <input type="text" class="cp-name" value="${(p[0]||"").replace(/"/g,'&quot;')}" placeholder="Nome" data-cr="${R}" data-ci="${i}">
+        <select class="cp-role" data-cr="${R}" data-ci="${i}">${roleOpts}</select>
+        <select class="cp-flag" data-cr="${R}" data-ci="${i}">${flagOpts}</select>
+        <button class="mini no cp-del" data-cr="${R}" data-ci="${i}">✕</button>
+      </div>`;
+    }).join("");
+    h+=`</div>`;
+  }
+  box.innerHTML=h;
+  box.querySelectorAll(".cp-name").forEach(inp=>inp.onchange=e=>{
+    ROSTER_PEOPLE[+e.target.dataset.cr][+e.target.dataset.ci][0]=e.target.value.trim();crewChanged();
+  });
+  box.querySelectorAll(".cp-role").forEach(s=>s.onchange=e=>{
+    ROSTER_PEOPLE[+e.target.dataset.cr][+e.target.dataset.ci][1]=e.target.value;crewChanged();
+  });
+  box.querySelectorAll(".cp-flag").forEach(s=>s.onchange=e=>{
+    const r=+e.target.dataset.cr,i=+e.target.dataset.ci,v=e.target.value,row=ROSTER_PEOPLE[r][i];
+    if(v)row[2]=v;else row.length=2;crewChanged();
+  });
+  box.querySelectorAll(".cp-del").forEach(b=>b.onclick=e=>{
+    const r=+b.dataset.cr,i=+b.dataset.ci,nm=ROSTER_PEOPLE[r][i][0];
+    if(!confirm("Togliere "+(nm||"questa persona")+" dal R"+String(r).padStart(2,"0")+"?"))return;
+    // pulizia: rimuovi eventuali sue richieste/voci di questo evento
+    Object.keys(decisions).forEach(k=>{const pk=parseDKey(k);if(pk.roster===r&&pk.name===nm)setDecision(r,nm,pk.day,null);});
+    ROSTER_PEOPLE[r].splice(i,1);crewChanged();
+  });
+  box.querySelectorAll("[data-cadd]").forEach(b=>b.onclick=()=>{
+    const r=+b.dataset.cadd;(ROSTER_PEOPLE[r]=ROSTER_PEOPLE[r]||[]).push(["","Ju"]);crewChanged();
+  });
+}
+
 /* ---------- init ---------- */
 function init(){
-  loadState();loadDec();
+  loadRoster();loadState();loadDec();
   fillEventInputs();
   document.getElementById("evName").oninput=e=>{ev().name=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
   document.getElementById("evStart").onchange=e=>{ev().start=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();renderCalib();};
@@ -928,7 +1054,18 @@ function init(){
     switchEvent(state.events[0].id);
   };
   document.getElementById("addFriend").onclick=()=>{state.friends.push({code:"",name:"",roster:""});saveState();renderFriends();renderFilters();renderPlan();};
-  renderFriends();renderCalib();renderSwapTables();renderFilters();renderPlan();
+  document.getElementById("crewReset").onclick=()=>{
+    if(!confirm("Ripristinare il roster di base? Le modifiche fatte verranno perse."))return;
+    ROSTER_PEOPLE=JSON.parse(JSON.stringify(ROSTER_PEOPLE_DEFAULT));crewChanged();
+  };
+  // drawer (menu hamburger)
+  const drawer=document.getElementById("drawer"),scrim=document.getElementById("scrim");
+  function openDrawer(){drawer.classList.add("open");scrim.classList.add("open");drawer.setAttribute("aria-hidden","false");}
+  function closeDrawer(){drawer.classList.remove("open");scrim.classList.remove("open");drawer.setAttribute("aria-hidden","true");}
+  document.getElementById("hambBtn").onclick=openDrawer;
+  document.getElementById("drawerX").onclick=closeDrawer;
+  scrim.onclick=closeDrawer;
+  renderFriends();renderCrew();renderCalib();renderSwapTables();renderFilters();renderPlan();
   initSupabase();
 }
 init();
