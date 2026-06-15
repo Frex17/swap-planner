@@ -207,6 +207,49 @@
     .day{transition:box-shadow .15s ease}
     .day:hover{box-shadow:0 3px 10px rgba(15,30,49,.1)}
   }
+  /* gruppi nel menu */
+  .grow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;
+    border:1.5px solid var(--line);background:var(--card);border-radius:9px;padding:9px 12px;margin-bottom:6px;cursor:pointer}
+  .grow.on{border-color:var(--amber);background:var(--amber-bg)}
+  .gname{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.05em;font-weight:700;font-size:15px;color:var(--ink)}
+  .grow.on .gname{color:#9a6f1f}
+  .gdate{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted)}
+  .ge-title{font-size:13px;color:var(--muted);background:var(--amber-bg);border-radius:7px;padding:7px 10px;margin-bottom:10px}
+  .ge-title b{color:#9a6f1f;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:15px}
+  /* persone del gruppo (crewcode) */
+  .frow{display:flex;gap:8px;align-items:center;margin:6px 0}
+  .fcode{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;background:var(--night);color:#fff;border-radius:5px;padding:5px 9px;flex:0 0 auto}
+  .fname{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .frost{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);font-weight:500;margin-left:4px}
+  .frow .r{flex:0 0 56px}
+  .frow .btn-danger{flex:0 0 auto;padding:7px 11px}
+
+  /* ---------- TEMA SCURO ---------- */
+  body.dark{
+    --night:#0B1622; --night-2:#101f30;
+    --paper:#0E1620; --card:#16212E;
+    --ink:#E7ECF2; --muted:#94A2B2; --line:#26323F;
+    --amber:#E0A93C; --amber-bg:#33291429;
+    --green:#3FBE86; --green-bg:#16352829;
+    --red:#E0675C; --red-bg:#3A201E29;
+    --gray:#9AA6B4; --gray-bg:#26323F;
+    --early:#5C9BDB; --early-bg:#16283A29;
+    --late:#9D7BD6;  --late-bg:#26203A29;
+    --clash:#E0A93C; --clash-bg:#33291429;
+    --accent:#36C0C0; --accent-bg:#10303029;
+  }
+  body.dark{background:var(--paper);color:var(--ink)}
+  body.dark .pool{background:#13202D}
+  body.dark .pool.shared{background:#2A2517}
+  body.dark .pool.ptpool{background:#10262B}
+  body.dark input,body.dark select{background:#0F1B26;color:var(--ink)}
+  body.dark .seg,body.dark .seg-sm{background:#1B2735}
+  body.dark .seg button.on,body.dark .seg-sm button.on{background:#2A3848}
+  body.dark .cand{border-top-color:#222E3B}
+  body.dark .exbtn{background:#16212E}
+  body.dark table.swap th{background:#1B2735}
+  body.dark .swap td.r{background:#16212E}
+  body.dark .crow,body.dark .pool{border-color:#26323F}
 </style>
 </head>
 <body>
@@ -222,7 +265,6 @@
 </header>
 
 <div class="filters">
-  <div class="chips" id="eventChips"></div>
   <div class="seg">
     <button data-view="day" class="on">Per giorno</button>
     <button data-view="person">Per persona</button>
@@ -257,27 +299,48 @@
   </div>
   <div class="drawer-b">
   <details class="panel" open>
+    <summary>Gruppi</summary>
+    <div class="pcont">
+      <div id="groupList"></div>
+      <button class="btn btn-ghost" id="addEvent" style="margin-top:8px">+ Nuovo gruppo</button>
+      <div id="groupEditor" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
+        <div class="ge-title">Stai modificando: <b id="geName">—</b></div>
+        <label class="fld">Nome gruppo</label>
+        <input type="text" id="evName">
+        <div class="row" style="margin-top:6px">
+          <div><label class="fld">Dal</label><input type="date" id="evStart"></div>
+          <div><label class="fld">Al</label><input type="date" id="evEnd"></div>
+        </div>
+        <label class="fld" style="margin-top:14px">Chi partecipa a questo gruppo</label>
+        <div class="chips" id="partChips" style="flex-wrap:wrap"></div>
+        <p class="hint">Solo i partecipanti vengono pianificati. Chi NON partecipa può dare swap (anche a voi).</p>
+        <div class="row" style="margin-top:12px">
+          <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
+          <button class="btn btn-danger" id="delEvent">Elimina gruppo</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <details class="panel">
     <summary>Impostazioni</summary>
     <div class="pcont">
-      <label class="fld">Nome evento</label>
-      <input type="text" id="evName">
-      <div class="row" style="margin-top:6px">
-        <div><label class="fld">Dal</label><input type="date" id="evStart"></div>
-        <div><label class="fld">Al</label><input type="date" id="evEnd"></div>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-ghost" id="addEvent">+ Nuovo evento</button>
-        <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
-        <button class="btn btn-danger" id="delEvent">Elimina evento</button>
+      <label class="fld">Tema</label>
+      <div class="seg-sm" id="themeSeg">
+        <button data-theme="light">☀︎ Chiaro</button>
+        <button data-theme="dark">☾ Scuro</button>
       </div>
 
       <label class="fld" style="margin-top:16px">Persone del gruppo</label>
+      <p class="hint" style="margin-top:0">Aggiungi col crewcode (es. AVILXI): nome e roster li conosce già l'app.</p>
       <div id="friends"></div>
-      <button class="btn btn-ghost" id="addFriend" style="margin-top:6px">+ Aggiungi persona</button>
+      <div class="row" style="margin-top:6px;align-items:center">
+        <input type="text" id="newFriendCode" placeholder="CREWCODE" style="text-transform:uppercase;font-family:'IBM Plex Mono',monospace">
+        <button class="btn btn-ghost" id="addFriend" style="flex:0 0 auto">+ Aggiungi</button>
+      </div>
 
-      <label class="fld" style="margin-top:16px">Chi partecipa a questo evento</label>
-      <div class="chips" id="partChips" style="flex-wrap:wrap"></div>
-      <p class="hint">Solo i partecipanti vengono pianificati. Chi NON partecipa può dare swap (anche a voi).</p>
+      <label class="fld" style="margin-top:16px">Resoconto</label>
+      <button class="btn btn-ghost" id="copyRecap">⧉ Copia resoconto (per WhatsApp)</button>
     </div>
   </details>
 
@@ -328,8 +391,20 @@ const ROSTER_PEOPLE_DEFAULT = {
   16:[["Arnesano","N1"],["Annalinda","N1"],["Margherita","Jupu"],["Marianna Annese","Ju"],["Luciana","Ju"]]
 };
 
-/* nomi-roster che corrispondono a voi 4 */
-const CREW_ALIAS = {SALIFR:"Francesco S.", AVILXI:"Ximena", NUZZMA:"Martina", RUSANG:"Angela"};
+/* anagrafica crew nota: crewcode -> {name visualizzato, roster, nome nel roster} */
+const CREW_DB = {
+  SALIFR:{name:"Francesco", roster:7,  rname:"Francesco S."},
+  AVILXI:{name:"Ximena",    roster:13, rname:"Ximena"},
+  NUZZMA:{name:"Martina",   roster:10, rname:"Martina"},
+  RUSANG:{name:"Angela",    roster:12, rname:"Angela"}
+};
+/* nomi-roster che corrispondono ai membri (per bloccarli come "nel gruppo") */
+const CREW_ALIAS = Object.fromEntries(Object.entries(CREW_DB).map(([c,v])=>[c,v.rname]));
+function friendFromCode(code){
+  code=(code||"").trim().toUpperCase();
+  const d=CREW_DB[code];
+  return d?{code,name:d.name,roster:d.roster}:{code,name:code,roster:""};
+}
 
 /* copia di lavoro modificabile dell'equipaggio base (persone arrivano/vanno) */
 const RKEY="swapplanner.roster";
@@ -652,16 +727,18 @@ async function initRosterSync(){
   }catch(e){console.warn("Equipaggio non sincronizzato:",e);setCrewSync(false);}
 }
 
+/* ---------- gruppi (nel menu) ---------- */
+function renderGroups(){
+  const gl=document.getElementById("groupList");if(!gl)return;
+  gl.innerHTML=state.events.map(e=>`<button class="grow ${e.id===state.cur?'on':''}" data-g="${e.id}">
+    <span class="gname">${e.name||'(senza nome)'}</span>
+    <span class="gdate">${pretty(e.start)} → ${pretty(e.end)}</span></button>`).join("");
+  gl.querySelectorAll(".grow").forEach(b=>b.onclick=()=>switchEvent(b.dataset.g));
+}
+
 /* ---------- filtri ---------- */
 function renderFilters(){
-  const ec=document.getElementById("eventChips");
-  ec.innerHTML=state.events.map(e=>`<button class="chip ev ${e.id===state.cur?'on':''}" data-e="${e.id}">${e.name||'(senza nome)'}</button>`).join("")+
-    `<button class="chip add" data-e="__add">＋ evento</button>`;
-  ec.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
-    if(c.dataset.e==="__add"){addNewEvent();return;}
-    switchEvent(c.dataset.e);
-  });
-
+  renderGroups();
   const pc=document.getElementById("personChips");
   pc.innerHTML=`<button class="chip ${state.ui.person==='all'?'on':''}" data-p="all">Tutti</button>`+
     participants().map(({f,idx})=>`<button class="chip ${state.ui.person==idx?'on':''}" data-p="${idx}">${f.name||f.code}</button>`).join("");
@@ -692,13 +769,14 @@ function switchEvent(id){
 function addNewEvent(){
   const today=new Date(),p=x=>String(x).padStart(2,"0");
   const t=today.getFullYear()+"-"+p(today.getMonth()+1)+"-"+p(today.getDate());
-  const e={id:"ev_"+Date.now(),name:"Nuovo evento",start:t,end:addDays(t,4),participants:state.friends.map(fid)};
+  const e={id:"ev_"+Date.now(),name:"Nuovo gruppo",start:t,end:addDays(t,4),participants:state.friends.map(fid)};
   state.events.push(e);pushEvent(e);switchEvent(e.id);
   const set=document.querySelector("details.panel");if(set)set.open=true;
-  document.getElementById("evName").focus();
+  const nm=document.getElementById("evName");if(nm){nm.focus();nm.select&&nm.select();}
 }
 function fillEventInputs(){
   const e=ev();
+  const gn=document.getElementById("geName");if(gn)gn.textContent=e.name||"(senza nome)";
   document.getElementById("evName").value=e.name;
   document.getElementById("evStart").value=e.start;
   document.getElementById("evEnd").value=e.end;
@@ -947,19 +1025,32 @@ function renderPlan(){
 function renderFriends(){
   const box=document.getElementById("friends");box.innerHTML="";
   state.friends.forEach((f,i)=>{
+    const known=!!CREW_DB[(f.code||"").toUpperCase()];
     const row=document.createElement("div");row.className="frow";
-    row.innerHTML=`<span class="c"><input type="text" value="${f.code||''}" placeholder="CODICE" data-i="${i}" data-k="code"></span>
-      <span class="n"><input type="text" value="${f.name||''}" placeholder="Nome" data-i="${i}" data-k="name"></span>
-      <span class="r"><input type="number" min="1" max="16" value="${f.roster||''}" placeholder="R" data-i="${i}" data-k="roster"></span>
-      <button class="btn btn-danger" data-del="${i}">✕</button>`;
+    if(known||f.roster){
+      row.innerHTML=`<span class="fcode">${f.code||"—"}</span>
+        <span class="fname">${f.name||f.code} <span class="frost">R${String(f.roster).padStart(2,"0")}</span></span>
+        <button class="btn btn-danger" data-del="${i}">✕</button>`;
+    }else{
+      row.innerHTML=`<span class="fcode">${f.code||"—"}</span>
+        <span class="fname" style="flex:1">${f.code} <span class="frost" style="color:var(--red)">roster?</span></span>
+        <input type="number" min="1" max="16" value="" placeholder="R" class="r" data-i="${i}">
+        <button class="btn btn-danger" data-del="${i}">✕</button>`;
+    }
     box.appendChild(row);
   });
-  box.querySelectorAll("input").forEach(inp=>inp.oninput=e=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k;
-    state.friends[i][k]=k==="roster"?(parseInt(e.target.value)||""):e.target.value;
-    saveState();renderFilters();renderPlan();renderCalib();
+  box.querySelectorAll("input.r").forEach(inp=>inp.onchange=e=>{
+    state.friends[+e.target.dataset.i].roster=parseInt(e.target.value)||"";
+    saveState();renderFriends();renderFilters();renderPlan();renderCalib();
   });
-  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{state.friends.splice(+e.target.dataset.del,1);saveState();renderFriends();renderFilters();renderPlan();});
+  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{state.friends.splice(+e.target.dataset.del,1);saveState();renderFriends();renderFilters();renderPlan();renderCalib();});
+}
+function addFriendByCode(code){
+  code=(code||"").trim().toUpperCase();
+  if(!code)return;
+  if(state.friends.some(f=>(f.code||"").toUpperCase()===code)){alert("Crewcode già presente.");return;}
+  state.friends.push(friendFromCode(code));
+  saveState();renderFriends();renderFilters();renderPlan();renderCalib();
 }
 function renderCalib(){renderParts();}  // calibrazione interna automatica
 function renderParts(){
@@ -1034,11 +1125,44 @@ function renderCrew(){
   });
 }
 
+/* ---------- tema ---------- */
+const TKEY="swapplanner.theme";
+function applyTheme(){
+  let t="light";try{t=localStorage.getItem(TKEY)||"light";}catch(e){}
+  document.body.classList.toggle("dark",t==="dark");
+  document.querySelectorAll("#themeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.theme===t));
+}
+function setTheme(t){try{localStorage.setItem(TKEY,t);}catch(e){}applyTheme();}
+
+/* ---------- copia resoconto ---------- */
+function copyRecap(){
+  const pend=pendingItems(),done=doneItems();
+  const e=ev();
+  let lines=["✈ "+(e.name||"Gruppo")+"  ("+pretty(e.start)+" → "+pretty(e.end)+")",""];
+  if(pend.length){
+    lines.push("⏳ IN ATTESA");
+    pend.slice().sort((a,b)=>a.d<b.d?-1:1).forEach(it=>lines.push("• "+weekday(it.d)+" "+pretty(it.d)+": "+it.by+" → "+it.name+" (R"+String(it.roster).padStart(2,"0")+")"));
+    lines.push("");
+  }
+  if(done.length){
+    lines.push("✅ PRESI");
+    done.slice().sort((a,b)=>a.d<b.d?-1:1).forEach(it=>{
+      if(it.kind==="swap")lines.push("• "+weekday(it.d)+" "+pretty(it.d)+": "+it.f.name+" → "+it.sw.name+" (R"+String(it.sw.roster).padStart(2,"0")+")");
+      else lines.push("• "+weekday(it.d)+" "+pretty(it.d)+": "+it.f.name+" → "+it.k);
+    });
+  }
+  if(!pend.length&&!done.length)lines.push("(niente ancora)");
+  const txt=lines.join("\n");
+  const done2=()=>{const b=document.getElementById("copyRecap");if(b){const o=b.textContent;b.textContent="✓ Copiato!";setTimeout(()=>b.textContent=o,1500);}};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done2,()=>{prompt("Copia:",txt);});
+  else prompt("Copia:",txt);
+}
+
 /* ---------- init ---------- */
 function init(){
   loadRoster();loadState();loadDec();
   fillEventInputs();
-  document.getElementById("evName").oninput=e=>{ev().name=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
+  document.getElementById("evName").oninput=e=>{ev().name=e.target.value;const gn=document.getElementById("geName");if(gn)gn.textContent=e.target.value||"(senza nome)";saveState();pushEvent(ev());renderFilters();renderPlan();};
   document.getElementById("evStart").onchange=e=>{ev().start=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();renderCalib();};
   document.getElementById("evEnd").onchange=e=>{ev().end=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();renderCalib();};
   document.getElementById("addEvent").onclick=addNewEvent;
@@ -1047,19 +1171,25 @@ function init(){
     decisions={};leaves={};saveDec();clearEventRemote();renderPlan();
   };
   document.getElementById("delEvent").onclick=()=>{
-    if(state.events.length<=1){alert("È l'unico evento: usa 'Azzera scelte' per ripulirlo.");return;}
-    if(!confirm("Eliminare questo evento e le sue scelte?"))return;
+    if(state.events.length<=1){alert("È l'unico gruppo: usa 'Azzera scelte' per ripulirlo.");return;}
+    if(!confirm("Eliminare questo gruppo e le sue scelte?"))return;
     const id=state.cur;
     state.events=state.events.filter(x=>x.id!==id);
     try{localStorage.removeItem("swapplanner.dec7."+id);}catch(e){}
     if(sbReady){sb.from("swap_decisions").delete().eq("event",id);pushEvent(id,true);}
     switchEvent(state.events[0].id);
   };
-  document.getElementById("addFriend").onclick=()=>{state.friends.push({code:"",name:"",roster:""});saveState();renderFriends();renderFilters();renderPlan();};
+  const nfc=document.getElementById("newFriendCode");
+  document.getElementById("addFriend").onclick=()=>{addFriendByCode(nfc.value);nfc.value="";};
+  nfc.onkeydown=e=>{if(e.key==="Enter"){addFriendByCode(nfc.value);nfc.value="";}};
   document.getElementById("crewReset").onclick=()=>{
     if(!confirm("Ripristinare il roster di base? Le modifiche fatte verranno perse."))return;
     ROSTER_PEOPLE=JSON.parse(JSON.stringify(ROSTER_PEOPLE_DEFAULT));crewChanged();
   };
+  // tema chiaro/scuro
+  document.querySelectorAll("#themeSeg button").forEach(b=>b.onclick=()=>setTheme(b.dataset.theme));
+  // copia resoconto
+  document.getElementById("copyRecap").onclick=copyRecap;
   // drawer (menu hamburger)
   const drawer=document.getElementById("drawer"),scrim=document.getElementById("scrim");
   function openDrawer(){drawer.classList.add("open");scrim.classList.add("open");drawer.setAttribute("aria-hidden","false");}
@@ -1067,6 +1197,7 @@ function init(){
   document.getElementById("hambBtn").onclick=openDrawer;
   document.getElementById("drawerX").onclick=closeDrawer;
   scrim.onclick=closeDrawer;
+  applyTheme();
   renderFriends();renderCrew();renderCalib();renderSwapTables();renderFilters();renderPlan();
   initSupabase();
 }
