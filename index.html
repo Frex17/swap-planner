@@ -77,32 +77,30 @@
 
   .wrap{max-width:680px;margin:0 auto;padding:12px 12px 70px}
 
-  .recap{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:12px 0;padding:12px 14px}
+  .recap{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;margin:12px 0;padding:11px 14px}
   .rtitle{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.07em;
-    font-weight:700;font-size:16px;color:var(--ink);margin-bottom:8px}
-  .rsec{margin-top:12px}
-  .rsec:first-of-type{margin-top:0}
-  .rsec-h{display:flex;align-items:center;justify-content:space-between;font-family:"Barlow Condensed",sans-serif;
-    text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:14px;padding:6px 11px;border-radius:8px}
-  .rsec-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;opacity:.8}
-  .rsec.pend .rsec-h{background:var(--amber-bg);color:var(--amber)}
-  .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
-  .rday{margin:8px 0 2px}
-  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);padding:4px 2px 5px}
-  .ri{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;
-    padding:8px 10px;border-radius:8px;background:var(--paper);margin-bottom:5px;flex-wrap:nowrap}
-  .ri-l{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
-  .ri-l b{font-weight:700}
-  .ri-l .arr{color:var(--muted);flex:0 0 auto}
-  .ri-a{display:flex;gap:5px;flex:0 0 auto}
+    font-weight:700;font-size:15px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+  .rcount{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+  .ritem{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:nowrap}
+  .ritem:first-of-type{border-top:0}
+  .ritem .rl{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ritem .cact{flex:0 0 auto;display:flex;gap:5px}
+  .ritem.pend{background:var(--amber-bg);border-radius:7px;padding:7px 9px;border-top:0;margin:4px 0}
+  .rwait{font-weight:700;color:var(--amber)}
   .rswap{font-weight:700;color:var(--green)}
-  .rmeta{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);white-space:nowrap}
-  .rpill{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px}
+  .rmeta{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .rpill{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px}
   .rpill.al{background:var(--gray-bg);color:var(--gray)}
   .rpill.vto{background:var(--green-bg);color:var(--green)}
   .rpill.skip{background:var(--gray-bg);color:var(--muted)}
-  body.dark .ri{background:#101c28}
+  .rsec{margin-top:10px}
+  .rsec-h{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:13px;
+    padding:5px 9px;border-radius:6px;display:inline-block;margin-bottom:4px}
+  .rsec.pend .rsec-h{background:var(--amber-bg);color:var(--amber)}
+  .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
+  .rday{margin:2px 0 8px}
+  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);padding:5px 0 2px;border-bottom:1px solid var(--line)}
   .rsolved{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em;
     color:var(--green);background:var(--green-bg);border-radius:6px;padding:5px 9px;margin-bottom:7px;display:inline-block}
 
@@ -264,6 +262,13 @@
   body.dark .ge-title b{color:var(--amber)}
   body.dark .mini.undo{background:#2A3845;color:var(--ink)}
   body.dark .dhead{border-bottom-color:#2A3744}
+  body.dark details.panel>summary{color:var(--ink)}
+  body.dark .dhead .dt{color:var(--ink)}
+  body.dark .dhead .dt small{color:var(--muted)}
+  body.dark .btn-ghost{color:var(--ink)}
+  body.dark .rtitle{color:var(--ink)}
+  body.dark .clashnote{color:var(--amber)}
+  body.dark .free,body.dark .hint{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -902,35 +907,37 @@ function renderRecap(){
   const box=document.getElementById("recap");
   if(!done.length&&!pend.length){box.style.display="none";box.innerHTML="";return;}
   box.style.display="block";
-  const map={AL:["al","Assenza"],VTO:["vto","VTO"],SKIP:["skip","Non serve"]};
+  box.style.borderLeftColor=pend.length?"var(--amber)":"var(--green)";
+  const map={AL:["al","A/L"],VTO:["vto","VTO"],SKIP:["skip","Non serve"]};
+  const cnt=[pend.length?pend.length+" in attesa":"",done.length?done.length+" presi":""].filter(Boolean).join(" · ");
   function byDay(arr){
     const m={};
     arr.forEach(it=>{(m[it.d]=m[it.d]||[]).push(it);});
     return Object.keys(m).sort().map(d=>({d,items:m[d]}));
   }
   function pendRow(it){
-    return `<div class="ri"><span class="ri-l"><b>${it.by}</b><span class="arr">→</span>${shortName(it.name)} <span class="rmeta">R${String(it.roster).padStart(2,"0")}</span></span>
-      <span class="ri-a"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
+    return `<div class="ritem pend"><span class="rl"><b>${it.by}</b> → <span class="rwait">⏳ ${shortName(it.name)}</span> <span class="rmeta">R${String(it.roster).padStart(2,"0")}</span></span>
+      <span class="cact"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
       <button class="mini no" data-ract="reject" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✕</button></span></div>`;
   }
   function doneRow(it){
-    if(it.kind==="swap")return `<div class="ri"><span class="ri-l"><b>${it.f.name}</b><span class="arr">→</span><span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
+    if(it.kind==="swap")return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
       <button class="mini undo" data-ract="undoswap" data-r="${it.sw.roster}" data-n="${it.sw.name}" data-d="${it.d}">↩</button></div>`;
     const pair=map[it.k]||["skip",it.k];
-    return `<div class="ri"><span class="ri-l"><b>${it.f.name}</b><span class="arr">→</span><span class="rpill ${pair[0]}">${pair[1]}</span></span>
+    return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
       <button class="mini undo" data-ract="undoleave" data-fc="${it.f.code}" data-d="${it.d}">↩</button></div>`;
   }
-  function section(cls,label,n,groups,rowFn){
+  function section(cls,label,groups,rowFn){
     if(!groups.length)return "";
-    let s=`<div class="rsec ${cls}"><div class="rsec-h"><span>${label}</span><span class="rsec-n">${n}</span></div>`;
+    let s=`<div class="rsec ${cls}"><div class="rsec-h">${label}</div>`;
     groups.forEach(g=>{
       s+=`<div class="rday"><div class="rday-h">${weekday(g.d)} ${pretty(g.d)}</div>${g.items.map(rowFn).join("")}</div>`;
     });
     return s+`</div>`;
   }
-  let h=`<div class="rtitle">Resoconto</div>`;
-  h+=section("pend","In attesa",pend.length,byDay(pend),pendRow);
-  h+=section("done","Presi",done.length,byDay(done),doneRow);
+  let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
+  h+=section("pend","⏳ In attesa",byDay(pend),pendRow);
+  h+=section("done","✓ Presi",byDay(done),doneRow);
   box.innerHTML=h;
   box.querySelectorAll("[data-ract]").forEach(b=>b.onclick=()=>{
     const a=b.dataset.ract;
