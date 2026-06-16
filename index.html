@@ -568,6 +568,9 @@ function ptCandidates(dutyType,day){
     ROSTER_PEOPLE[r].forEach(p=>{
       const fl=p[2];
       if(fl!=="ptE"&&fl!=="ptL")return;
+      // Un PT dà swap SOLO del suo tipo: per il tipo opposto le 60h di riposo non escono mai
+      // sui suoi giorni di riferimento (es. late finisce il 9, early il 12 = ~48h, non 60).
+      if((fl==="ptE")!==(dutyType==="early"))return;
       if(!ptAvailable(r,fl,day))return;
       const lock=grp.has(p[0])?"group":null;
       out.push({roster:r,name:p[0],role:p[1],pt:fl,lock,dec:lock?null:(decisions[dKey(r,p[0],day)]||null)});
