@@ -77,29 +77,32 @@
 
   .wrap{max-width:680px;margin:0 auto;padding:12px 12px 70px}
 
-  .recap{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;margin:12px 0;padding:11px 14px}
+  .recap{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:12px 0;padding:12px 14px}
   .rtitle{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.07em;
-    font-weight:700;font-size:15px;color:var(--night);display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-  .rcount{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
-  .ritem{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:nowrap}
-  .ritem:first-of-type{border-top:0}
-  .ritem .rl{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ritem.pend{background:var(--amber-bg);border-radius:7px;padding:7px 9px;border-top:0;margin:4px 0}
-  .rwait{font-weight:700;color:#9a6f1f}
+    font-weight:700;font-size:16px;color:var(--ink);margin-bottom:8px}
+  .rsec{margin-top:12px}
+  .rsec:first-of-type{margin-top:0}
+  .rsec-h{display:flex;align-items:center;justify-content:space-between;font-family:"Barlow Condensed",sans-serif;
+    text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:14px;padding:6px 11px;border-radius:8px}
+  .rsec-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;opacity:.8}
+  .rsec.pend .rsec-h{background:var(--amber-bg);color:var(--amber)}
+  .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
+  .rday{margin:8px 0 2px}
+  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);padding:4px 2px 5px}
+  .ri{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;
+    padding:8px 10px;border-radius:8px;background:var(--paper);margin-bottom:5px;flex-wrap:nowrap}
+  .ri-l{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+  .ri-l b{font-weight:700}
+  .ri-l .arr{color:var(--muted);flex:0 0 auto}
+  .ri-a{display:flex;gap:5px;flex:0 0 auto}
   .rswap{font-weight:700;color:var(--green)}
-  .rmeta{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap}
-  .rpill{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px}
+  .rmeta{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);white-space:nowrap}
+  .rpill{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px}
   .rpill.al{background:var(--gray-bg);color:var(--gray)}
   .rpill.vto{background:var(--green-bg);color:var(--green)}
-  .rpill.skip{background:#F0F1ED;color:#8a93a0}
-  .rsec{margin-top:10px}
-  .rsec-h{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:13px;
-    padding:5px 9px;border-radius:6px;display:inline-block;margin-bottom:4px}
-  .rsec.pend .rsec-h{background:var(--amber-bg);color:#9a6f1f}
-  .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
-  .rday{margin:2px 0 8px}
-  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--muted);padding:5px 0 2px;border-bottom:1px solid #EEF0EB}
+  .rpill.skip{background:var(--gray-bg);color:var(--muted)}
+  body.dark .ri{background:#101c28}
   .rsolved{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em;
     color:var(--green);background:var(--green-bg);border-radius:6px;padding:5px 9px;margin-bottom:7px;display:inline-block}
 
@@ -226,30 +229,41 @@
 
   /* ---------- TEMA SCURO ---------- */
   body.dark{
-    --night:#0B1622; --night-2:#101f30;
-    --paper:#0E1620; --card:#16212E;
-    --ink:#E7ECF2; --muted:#94A2B2; --line:#26323F;
-    --amber:#E0A93C; --amber-bg:#33291429;
-    --green:#3FBE86; --green-bg:#16352829;
-    --red:#E0675C; --red-bg:#3A201E29;
-    --gray:#9AA6B4; --gray-bg:#26323F;
-    --early:#5C9BDB; --early-bg:#16283A29;
-    --late:#9D7BD6;  --late-bg:#26203A29;
-    --clash:#E0A93C; --clash-bg:#33291429;
-    --accent:#36C0C0; --accent-bg:#10303029;
+    --night:#0B1420; --night-2:#0F1C2B;
+    --paper:#0F1722; --card:#1A2532;
+    --ink:#EAF0F6; --muted:#A6B3C2; --line:#2E3C4B;
+    --amber:#F0B84A; --amber-bg:#3A2D12;
+    --green:#4FD295; --green-bg:#15392A;
+    --red:#F0796E; --red-bg:#3E211E;
+    --gray:#AEBAC8; --gray-bg:#2A3845;
+    --early:#74AEE8; --early-bg:#16293D;
+    --late:#B091E2;  --late-bg:#272043;
+    --clash:#F0B84A; --clash-bg:#3A2D12;
+    --accent:#46D3D3; --accent-bg:#103838;
   }
   body.dark{background:var(--paper);color:var(--ink)}
-  body.dark .pool{background:#13202D}
-  body.dark .pool.shared{background:#2A2517}
-  body.dark .pool.ptpool{background:#10262B}
-  body.dark input,body.dark select{background:#0F1B26;color:var(--ink)}
-  body.dark .seg,body.dark .seg-sm{background:#1B2735}
-  body.dark .seg button.on,body.dark .seg-sm button.on{background:#2A3848}
-  body.dark .cand{border-top-color:#222E3B}
-  body.dark .exbtn{background:#16212E}
-  body.dark table.swap th{background:#1B2735}
-  body.dark .swap td.r{background:#16212E}
-  body.dark .crow,body.dark .pool{border-color:#26323F}
+  body.dark .day,body.dark .recap,body.dark .panel{box-shadow:none}
+  body.dark .day::before,body.dark .day::after{background:var(--paper);border-color:var(--line)}
+  body.dark .pool{background:#111E2B;border-color:#2A3744}
+  body.dark .pool.shared{background:#2E2616;border-color:#544523}
+  body.dark .pool.ptpool{background:#0F2A2C;border-color:#1F4A4A}
+  body.dark input,body.dark select{background:#0E1A26;color:var(--ink);border-color:var(--line)}
+  body.dark .seg,body.dark .seg-sm{background:#1C2937}
+  body.dark .seg button,body.dark .seg-sm button{color:var(--ink)}
+  body.dark .seg button.on,body.dark .seg-sm button.on{background:#30425580;color:#fff}
+  body.dark .chip{color:var(--ink);border-color:#3A4A5B}
+  body.dark .chip.on{background:#fff;color:var(--night)}
+  body.dark .cand{border-top-color:#26333F}
+  body.dark .worker{border-bottom-color:#23303C}
+  body.dark .exbtn{background:#1A2532;color:var(--muted)}
+  body.dark table.swap th{background:#1C2937}
+  body.dark table.swap td{border-color:#2A3744}
+  body.dark .swap td.r{background:#162232}
+  body.dark .crow{background:#13202D;border-color:#2A3744}
+  body.dark .fcode,body.dark .rbadge{background:#2A3845}
+  body.dark .ge-title b{color:var(--amber)}
+  body.dark .mini.undo{background:#2A3845;color:var(--ink)}
+  body.dark .dhead{border-bottom-color:#2A3744}
 </style>
 </head>
 <body>
@@ -303,50 +317,40 @@
     <div class="pcont">
       <div id="groupList"></div>
       <button class="btn btn-ghost" id="addEvent" style="margin-top:8px">+ Nuovo gruppo</button>
-      <div id="groupEditor" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
-        <div class="ge-title">Stai modificando: <b id="geName">—</b></div>
-        <label class="fld">Nome gruppo</label>
-        <input type="text" id="evName">
-        <div class="row" style="margin-top:6px">
-          <div><label class="fld">Dal</label><input type="date" id="evStart"></div>
-          <div><label class="fld">Al</label><input type="date" id="evEnd"></div>
-        </div>
-        <label class="fld" style="margin-top:14px">Chi partecipa a questo gruppo</label>
-        <div class="chips" id="partChips" style="flex-wrap:wrap"></div>
-        <p class="hint">Solo i partecipanti vengono pianificati. Chi NON partecipa può dare swap (anche a voi).</p>
-        <div class="row" style="margin-top:12px">
-          <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
-          <button class="btn btn-danger" id="delEvent">Elimina gruppo</button>
-        </div>
-      </div>
     </div>
   </details>
 
   <details class="panel">
     <summary>Impostazioni</summary>
     <div class="pcont">
-      <label class="fld">Tema</label>
+      <div class="ge-title">Gruppo selezionato: <b id="geName">—</b></div>
+      <label class="fld">Nome gruppo</label>
+      <input type="text" id="evName">
+      <div class="row" style="margin-top:6px">
+        <div><label class="fld">Dal</label><input type="date" id="evStart"></div>
+        <div><label class="fld">Al</label><input type="date" id="evEnd"></div>
+      </div>
+      <label class="fld" style="margin-top:14px">Partecipanti al gruppo</label>
+      <p class="hint" style="margin-top:0">Aggiungi col crewcode (es. AVILXI). Sono diversi per ogni gruppo; nome e roster li conosce già l'app.</p>
+      <div id="partList"></div>
+      <div class="row" style="margin-top:6px;align-items:center">
+        <input type="text" id="newPartCode" placeholder="CREWCODE" style="text-transform:uppercase;font-family:'IBM Plex Mono',monospace">
+        <button class="btn btn-ghost" id="addPart" style="flex:0 0 auto">+ Aggiungi</button>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
+        <button class="btn btn-danger" id="delEvent">Elimina gruppo</button>
+      </div>
+
+      <label class="fld" style="margin-top:18px">Tema</label>
       <div class="seg-sm" id="themeSeg">
         <button data-theme="light">☀︎ Chiaro</button>
         <button data-theme="dark">☾ Scuro</button>
       </div>
 
-      <label class="fld" style="margin-top:16px">Persone del gruppo</label>
-      <p class="hint" style="margin-top:0">Aggiungi col crewcode (es. AVILXI): nome e roster li conosce già l'app.</p>
-      <div id="friends"></div>
-      <div class="row" style="margin-top:6px;align-items:center">
-        <input type="text" id="newFriendCode" placeholder="CREWCODE" style="text-transform:uppercase;font-family:'IBM Plex Mono',monospace">
-        <button class="btn btn-ghost" id="addFriend" style="flex:0 0 auto">+ Aggiungi</button>
-      </div>
-
       <label class="fld" style="margin-top:16px">Resoconto</label>
       <button class="btn btn-ghost" id="copyRecap">⧉ Copia resoconto (per WhatsApp)</button>
     </div>
-  </details>
-
-  <details class="panel">
-    <summary>Swap Table</summary>
-    <div class="pcont"><div id="swapTables"></div></div>
   </details>
 
   <details class="panel">
@@ -359,6 +363,11 @@
         <span class="sync" id="crewSync" style="background:#ECEEF1;color:var(--muted)"><span class="d"></span><span id="crewSyncTxt">solo locale</span></span>
       </div>
     </div>
+  </details>
+
+  <details class="panel">
+    <summary>Swap Table</summary>
+    <div class="pcont"><div id="swapTables"></div></div>
   </details>
   </div>
 </aside>
@@ -482,22 +491,20 @@ function partnersFor(r,st){
   return [norm16(a),norm16(a+2)];
 }
 function isWork(st){return st.type==="early"||st.type==="late";}
-/* partecipanti dell'evento corrente: solo loro vanno pianificati e bloccati come "nel gruppo";
-   gli altri (non partecipano) restano candidati normali e possono dare swap */
+/* partecipanti del gruppo corrente: lista di crewcode, risolti dall'anagrafica.
+   Solo loro vanno pianificati e bloccati come "nel gruppo"; gli altri possono dare swap. */
+function memberByCode(code){const d=CREW_DB[(code||"").toUpperCase()];return d?{code:(code||"").toUpperCase(),name:d.name,roster:d.roster}:null;}
 function participants(){
-  const codes=ev().participants;
+  const codes=ev().participants||[];
   const out=[];
-  state.friends.forEach((f,idx)=>{
-    if(!f.roster)return;
-    if(!codes||!codes.length||codes.includes(fid(f)))out.push({f,idx});
-  });
+  codes.forEach(code=>{const f=memberByCode(code);if(f&&!out.some(o=>o.code===f.code))out.push({f,code:f.code});});
   return out;
 }
 function groupNames(){
   const s=new Set();
   participants().forEach(({f})=>{
     if(f.name)s.add(f.name);
-    if(f.code&&CREW_ALIAS[f.code])s.add(CREW_ALIAS[f.code]);
+    if(CREW_ALIAS[f.code])s.add(CREW_ALIAS[f.code]);
   });
   return s;
 }
@@ -580,9 +587,9 @@ function eventDays(){
 }
 function workersOn(d){
   const w=[];
-  participants().forEach(({f,idx})=>{
+  participants().forEach(({f})=>{
     const st=statusFor(f,d);
-    w.push({f,idx,st,partners:isWork(st)?partnersFor(f.roster,st):[]});
+    w.push({f,st,partners:isWork(st)?partnersFor(f.roster,st):[]});
   });
   return w;
 }
@@ -741,8 +748,8 @@ function renderFilters(){
   renderGroups();
   const pc=document.getElementById("personChips");
   pc.innerHTML=`<button class="chip ${state.ui.person==='all'?'on':''}" data-p="all">Tutti</button>`+
-    participants().map(({f,idx})=>`<button class="chip ${state.ui.person==idx?'on':''}" data-p="${idx}">${f.name||f.code}</button>`).join("");
-  pc.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{state.ui.person=c.dataset.p==="all"?"all":+c.dataset.p;saveState();renderFilters();renderPlan();});
+    participants().map(({f})=>`<button class="chip ${state.ui.person===f.code?'on':''}" data-p="${f.code}">${f.name||f.code}</button>`).join("");
+  pc.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{state.ui.person=c.dataset.p==="all"?"all":c.dataset.p;saveState();renderFilters();renderPlan();});
 
   const dc=document.getElementById("dayChips");
   dc.innerHTML=`<button class="chip ${state.ui.day==='all'?'on':''}" data-d="all">Tutti</button>`+
@@ -769,7 +776,7 @@ function switchEvent(id){
 function addNewEvent(){
   const today=new Date(),p=x=>String(x).padStart(2,"0");
   const t=today.getFullYear()+"-"+p(today.getMonth()+1)+"-"+p(today.getDate());
-  const e={id:"ev_"+Date.now(),name:"Nuovo gruppo",start:t,end:addDays(t,4),participants:state.friends.map(fid)};
+  const e={id:"ev_"+Date.now(),name:"Nuovo gruppo",start:t,end:addDays(t,4),participants:[]};
   state.events.push(e);pushEvent(e);switchEvent(e.id);
   const set=document.querySelector("details.panel");if(set)set.open=true;
   const nm=document.getElementById("evName");if(nm){nm.focus();nm.select&&nm.select();}
@@ -859,9 +866,9 @@ function workerEntryHTML(w,d,shared){
   h+=`</div>`;
   h+=poolsHTML(w,d,shared);
   h+=`<div class="cover">Oppure:
-    <button class="mini alx" data-lact="AL" data-fi="${w.idx}" data-d="${d}">A/L</button>
-    <button class="mini vtox" data-lact="VTO" data-fi="${w.idx}" data-d="${d}">VTO</button>
-    <button class="mini skipx" data-lact="SKIP" data-fi="${w.idx}" data-d="${d}">Non serve</button></div>`;
+    <button class="mini alx" data-lact="AL" data-fc="${w.f.code}" data-d="${d}">A/L</button>
+    <button class="mini vtox" data-lact="VTO" data-fc="${w.f.code}" data-d="${d}">VTO</button>
+    <button class="mini skipx" data-lact="SKIP" data-fc="${w.f.code}" data-d="${d}">Non serve</button></div>`;
   return h;
 }
 
@@ -869,12 +876,12 @@ function workerEntryHTML(w,d,shared){
 function doneItems(){
   const done=[];
   eventDays().forEach(d=>{
-    participants().forEach(({f,idx})=>{
+    participants().forEach(({f})=>{
       const st=statusFor(f,d);
-      if(st.type==="leave"){done.push({kind:"leave",f,idx,d,k:st.kind});return;}
+      if(st.type==="leave"){done.push({kind:"leave",f,d,k:st.kind});return;}
       if(!isWork(st))return;
       const sw=securedSwapFor(f.name,d);
-      if(sw)done.push({kind:"swap",f,idx,d,sw});
+      if(sw)done.push({kind:"swap",f,d,sw});
     });
   });
   return done;
@@ -895,47 +902,42 @@ function renderRecap(){
   const box=document.getElementById("recap");
   if(!done.length&&!pend.length){box.style.display="none";box.innerHTML="";return;}
   box.style.display="block";
-  box.style.borderLeftColor=pend.length?"var(--amber)":"var(--green)";
-  const map={AL:["al","A/L"],VTO:["vto","VTO"],SKIP:["skip","NON SERVE"]};
-  const cnt=[pend.length?pend.length+" in attesa":"",done.length?done.length+" presi":""].filter(Boolean).join(" · ");
-
-  // raggruppa per data (in ordine)
+  const map={AL:["al","Assenza"],VTO:["vto","VTO"],SKIP:["skip","Non serve"]};
   function byDay(arr){
     const m={};
     arr.forEach(it=>{(m[it.d]=m[it.d]||[]).push(it);});
     return Object.keys(m).sort().map(d=>({d,items:m[d]}));
   }
   function pendRow(it){
-    return `<div class="ritem pend"><span class="rl"><b>${it.by}</b> → <span class="rwait">⏳ ${shortName(it.name)}</span> <span class="rmeta">R${String(it.roster).padStart(2,"0")}</span></span>
-      <span class="cact"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
+    return `<div class="ri"><span class="ri-l"><b>${it.by}</b><span class="arr">→</span>${shortName(it.name)} <span class="rmeta">R${String(it.roster).padStart(2,"0")}</span></span>
+      <span class="ri-a"><button class="mini ok" data-ract="confirm" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✓</button>
       <button class="mini no" data-ract="reject" data-r="${it.roster}" data-n="${it.name}" data-d="${it.d}">✕</button></span></div>`;
   }
   function doneRow(it){
-    if(it.kind==="swap")return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
+    if(it.kind==="swap")return `<div class="ri"><span class="ri-l"><b>${it.f.name}</b><span class="arr">→</span><span class="rswap">${shortName(it.sw.name)}</span> <span class="rmeta">R${String(it.sw.roster).padStart(2,"0")}</span></span>
       <button class="mini undo" data-ract="undoswap" data-r="${it.sw.roster}" data-n="${it.sw.name}" data-d="${it.d}">↩</button></div>`;
     const pair=map[it.k]||["skip",it.k];
-    return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
-      <button class="mini undo" data-ract="undoleave" data-fi="${it.idx}" data-d="${it.d}">↩</button></div>`;
+    return `<div class="ri"><span class="ri-l"><b>${it.f.name}</b><span class="arr">→</span><span class="rpill ${pair[0]}">${pair[1]}</span></span>
+      <button class="mini undo" data-ract="undoleave" data-fc="${it.f.code}" data-d="${it.d}">↩</button></div>`;
   }
-  function section(cls,label,groups,rowFn){
+  function section(cls,label,n,groups,rowFn){
     if(!groups.length)return "";
-    let s=`<div class="rsec ${cls}"><div class="rsec-h">${label}</div>`;
+    let s=`<div class="rsec ${cls}"><div class="rsec-h"><span>${label}</span><span class="rsec-n">${n}</span></div>`;
     groups.forEach(g=>{
       s+=`<div class="rday"><div class="rday-h">${weekday(g.d)} ${pretty(g.d)}</div>${g.items.map(rowFn).join("")}</div>`;
     });
     return s+`</div>`;
   }
-
-  let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
-  h+=section("pend","⏳ In attesa",byDay(pend),pendRow);
-  h+=section("done","✓ Presi",byDay(done),doneRow);
+  let h=`<div class="rtitle">Resoconto</div>`;
+  h+=section("pend","In attesa",pend.length,byDay(pend),pendRow);
+  h+=section("done","Presi",done.length,byDay(done),doneRow);
   box.innerHTML=h;
   box.querySelectorAll("[data-ract]").forEach(b=>b.onclick=()=>{
     const a=b.dataset.ract;
     if(a==="confirm"){const k=dKey(+b.dataset.r,b.dataset.n,b.dataset.d),old=decisions[k]||{};setDecision(+b.dataset.r,b.dataset.n,b.dataset.d,{status:"secured",by:old.by,day:b.dataset.d});}
-    else if(a==="reject")setDecision(+b.dataset.r,b.dataset.n,b.dataset.d,null); /* ha detto no: torna disponibile quel giorno */
+    else if(a==="reject")setDecision(+b.dataset.r,b.dataset.n,b.dataset.d,null);
     else if(a==="undoswap")setDecision(+b.dataset.r,b.dataset.n,b.dataset.d,null);
-    else setLeave(state.friends[+b.dataset.fi],b.dataset.d,null);
+    else setLeave(memberByCode(b.dataset.fc),b.dataset.d,null);
   });
 }
 
@@ -948,14 +950,14 @@ function renderPlan(){
   let days=eventDays();
   if(!days.length){box.innerHTML='<div class="day"><div class="dbody free">Imposta date valide nelle impostazioni.</div></div>';return;}
   if(state.ui.day!=="all")days=days.filter(d=>d===state.ui.day);
-  const personF=state.ui.person==="all"?null:+state.ui.person;
+  const personF=state.ui.person==="all"?null:state.ui.person;
 
   if(state.ui.view==="day"){
     box.innerHTML="";
     days.forEach(d=>{
       const shared=sharedRosters(d);
       let ws=workersOn(d);
-      if(personF!==null)ws=ws.filter(w=>w.idx===personF);
+      if(personF!==null)ws=ws.filter(w=>w.f.code===personF);
       const unres=ws.filter(w=>isWork(w.st)&&!securedSwapFor(w.f.name,d));
       const el=document.createElement("div");el.className="day";
       const declN=declinedCountForDay(d);
@@ -979,8 +981,8 @@ function renderPlan(){
     });
   } else {
     box.innerHTML="";
-    participants().forEach(({f,idx})=>{
-      if(personF!==null&&idx!==personF)return;
+    participants().forEach(({f})=>{
+      if(personF!==null&&f.code!==personF)return;
       const el=document.createElement("div");el.className="day";
       el.innerHTML=`<div class="dhead"><span class="dt">${f.name||f.code}</span><span class="tag done">R ${String(f.roster).padStart(2,"0")}</span></div>`;
       const body=document.createElement("div");body.className="dbody";
@@ -992,7 +994,7 @@ function renderPlan(){
         shown++;
         const shared=sharedRosters(d);
         const wr=document.createElement("div");wr.className="worker";
-        const inner=workerEntryHTML({f,idx,st,partners:partnersFor(f.roster,st)},d,shared)
+        const inner=workerEntryHTML({f,st,partners:partnersFor(f.roster,st)},d,shared)
           .replace(`<span class="who">${f.name||f.code}</span>`,`<span class="who" style="font-size:14px">${weekday(d)} ${pretty(d)}</span>`);
         wr.innerHTML=inner;
         body.appendChild(wr);
@@ -1011,7 +1013,7 @@ function renderPlan(){
 
   box.querySelectorAll(".mini").forEach(b=>{
     b.onclick=()=>{
-      if(b.dataset.lact){const f=state.friends[+b.dataset.fi];setLeave(f,b.dataset.d,b.dataset.lact==="none"?null:b.dataset.lact);return;}
+      if(b.dataset.lact){const f=memberByCode(b.dataset.fc);setLeave(f,b.dataset.d,b.dataset.lact==="none"?null:b.dataset.lact);return;}
       const r=+b.dataset.r,n=b.dataset.n,d=b.dataset.d,act=b.dataset.act;
       if(act==="pending")setDecision(r,n,d,{status:"pending",by:b.dataset.f,day:d});
       else if(act==="secure")setDecision(r,n,d,{status:"secured",by:b.dataset.f,day:d});
@@ -1021,57 +1023,36 @@ function renderPlan(){
   });
 }
 
-/* ---------- impostazioni ---------- */
-function renderFriends(){
-  const box=document.getElementById("friends");box.innerHTML="";
-  state.friends.forEach((f,i)=>{
-    const known=!!CREW_DB[(f.code||"").toUpperCase()];
-    const row=document.createElement("div");row.className="frow";
-    if(known||f.roster){
-      row.innerHTML=`<span class="fcode">${f.code||"—"}</span>
-        <span class="fname">${f.name||f.code} <span class="frost">R${String(f.roster).padStart(2,"0")}</span></span>
-        <button class="btn btn-danger" data-del="${i}">✕</button>`;
-    }else{
-      row.innerHTML=`<span class="fcode">${f.code||"—"}</span>
-        <span class="fname" style="flex:1">${f.code} <span class="frost" style="color:var(--red)">roster?</span></span>
-        <input type="number" min="1" max="16" value="" placeholder="R" class="r" data-i="${i}">
-        <button class="btn btn-danger" data-del="${i}">✕</button>`;
-    }
-    box.appendChild(row);
-  });
-  box.querySelectorAll("input.r").forEach(inp=>inp.onchange=e=>{
-    state.friends[+e.target.dataset.i].roster=parseInt(e.target.value)||"";
-    saveState();renderFriends();renderFilters();renderPlan();renderCalib();
-  });
-  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{state.friends.splice(+e.target.dataset.del,1);saveState();renderFriends();renderFilters();renderPlan();renderCalib();});
-}
-function addFriendByCode(code){
-  code=(code||"").trim().toUpperCase();
-  if(!code)return;
-  if(state.friends.some(f=>(f.code||"").toUpperCase()===code)){alert("Crewcode già presente.");return;}
-  state.friends.push(friendFromCode(code));
-  saveState();renderFriends();renderFilters();renderPlan();renderCalib();
-}
+/* ---------- impostazioni: partecipanti per gruppo ---------- */
 function renderCalib(){renderParts();}  // calibrazione interna automatica
 function renderParts(){
-  const box=document.getElementById("partChips");if(!box)return;
-  const codes=ev().participants;
-  box.innerHTML=state.friends.map(f=>{
-    const on=!codes||!codes.length||codes.includes(fid(f));
-    return `<button class="chip ${on?'on':''}" data-pf="${fid(f)}">${f.name||f.code}</button>`;
-  }).join("");
-  box.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
-    const code=c.dataset.pf,e=ev();
-    let list=(e.participants&&e.participants.length)?e.participants.slice():state.friends.map(fid);
-    if(list.includes(code))list=list.filter(x=>x!==code);else list.push(code);
-    e.participants=list;
+  const box=document.getElementById("partList");if(!box)return;
+  const codes=ev().participants||[];
+  box.innerHTML=codes.length?codes.map((code,i)=>{
+    const d=CREW_DB[code];
+    const nm=d?d.name:code, ros=d?("R"+String(d.roster).padStart(2,"0")):'<span style="color:var(--red)">?</span>';
+    return `<div class="frow"><span class="fcode">${code}</span>
+      <span class="fname">${nm} <span class="frost">${ros}</span></span>
+      <button class="btn btn-danger" data-pdel="${i}">✕</button></div>`;
+  }).join(""):`<p class="hint" style="margin:2px 0 0">Nessun partecipante. Aggiungili col crewcode qui sotto.</p>`;
+  box.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
+    const e=ev();(e.participants=e.participants||[]).splice(+b.dataset.pdel,1);
     saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
   });
+}
+function addParticipantByCode(code){
+  code=(code||"").trim().toUpperCase();
+  if(!code)return;
+  if(!CREW_DB[code]){alert("Crewcode sconosciuto: "+code+".\nDimmi nome e roster e lo aggiungo all'anagrafica.");return;}
+  const e=ev();e.participants=e.participants||[];
+  if(e.participants.includes(code)){alert("Già nel gruppo.");return;}
+  e.participants.push(code);
+  saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
 }
 function renderSwapTables(){
   const wrap=document.getElementById("swapTables");
   function tbl(title,fn){
-    let h=`<div class="cond" style="font-weight:700;font-size:13px;margin-top:10px;color:var(--night)">${title}</div><table class="swap"><tr><th>R</th><th>G1</th><th>G2</th><th>G3</th><th>G4</th><th>G5</th></tr>`;
+    let h=`<div class="cond" style="font-weight:700;font-size:13px;margin-top:10px;color:var(--ink)">${title}</div><table class="swap"><tr><th>R</th><th>G1</th><th>G2</th><th>G3</th><th>G4</th><th>G5</th></tr>`;
     for(let R=1;R<=16;R++){h+=`<tr><td class="r">${R}</td>`;for(let d=1;d<=5;d++)h+=`<td>${fn(R,d).join(" · ")}</td>`;h+="</tr>";}
     return h+"</table>";
   }
@@ -1179,9 +1160,9 @@ function init(){
     if(sbReady){sb.from("swap_decisions").delete().eq("event",id);pushEvent(id,true);}
     switchEvent(state.events[0].id);
   };
-  const nfc=document.getElementById("newFriendCode");
-  document.getElementById("addFriend").onclick=()=>{addFriendByCode(nfc.value);nfc.value="";};
-  nfc.onkeydown=e=>{if(e.key==="Enter"){addFriendByCode(nfc.value);nfc.value="";}};
+  const nfc=document.getElementById("newPartCode");
+  document.getElementById("addPart").onclick=()=>{addParticipantByCode(nfc.value);nfc.value="";};
+  nfc.onkeydown=e=>{if(e.key==="Enter"){addParticipantByCode(nfc.value);nfc.value="";}};
   document.getElementById("crewReset").onclick=()=>{
     if(!confirm("Ripristinare il roster di base? Le modifiche fatte verranno perse."))return;
     ROSTER_PEOPLE=JSON.parse(JSON.stringify(ROSTER_PEOPLE_DEFAULT));crewChanged();
@@ -1198,7 +1179,7 @@ function init(){
   document.getElementById("drawerX").onclick=closeDrawer;
   scrim.onclick=closeDrawer;
   applyTheme();
-  renderFriends();renderCrew();renderCalib();renderSwapTables();renderFilters();renderPlan();
+  renderCrew();renderCalib();renderSwapTables();renderFilters();renderPlan();
   initSupabase();
 }
 init();
