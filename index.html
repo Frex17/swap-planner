@@ -93,14 +93,21 @@
   .rpill.al{background:var(--gray-bg);color:var(--gray)}
   .rpill.vto{background:var(--green-bg);color:var(--green)}
   .rpill.skip{background:var(--gray-bg);color:var(--muted)}
-  .rsec{margin-top:10px}
-  .rsec-h{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:13px;
-    padding:5px 9px;border-radius:6px;display:inline-block;margin-bottom:4px}
+  .rsec{margin-top:12px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .rsec:first-of-type{margin-top:6px}
+  .rsec-h{display:flex;align-items:center;justify-content:space-between;font-family:"Barlow Condensed",sans-serif;
+    text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:14px;padding:7px 12px}
+  .rsec-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;opacity:.85}
+  .rsec.pend{border-color:#E7CF96}
   .rsec.pend .rsec-h{background:var(--amber-bg);color:var(--amber)}
+  .rsec.done{border-color:#BCE3CE}
   .rsec.done .rsec-h{background:var(--green-bg);color:var(--green)}
-  .rday{margin:2px 0 8px}
-  .rday-h{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--muted);padding:5px 0 2px;border-bottom:1px solid var(--line)}
+  .rsec-b{padding:4px 12px 10px}
+  .rday{margin:8px 0 2px}
+  .rday-h{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);background:var(--gray-bg);border:1px solid var(--line);border-radius:5px;padding:3px 8px;margin-bottom:4px}
+  body.dark .rsec.pend{border-color:#5a4a26}
+  body.dark .rsec.done{border-color:#235340}
   .rsolved{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em;
     color:var(--green);background:var(--green-bg);border-radius:6px;padding:5px 9px;margin-bottom:7px;display:inline-block}
 
@@ -865,7 +872,7 @@ function workerEntryHTML(w,d,shared){
   const pend=pendingSwapsFor(w.f.name,d);
   const av=availableCount(w.f,w.partners,w.st.type,d);
   let h=`<div class="whead"><span class="who">${w.f.name||w.f.code}</span>
-    <span class="pill ${w.st.type}">${w.st.type==='early'?'EARLY':'LATE'} G${w.st.day}</span>`;
+    <span class="pill ${w.st.type}">${w.st.type==='early'?'EARLY':'LATE'} Day ${w.st.day}</span>`;
   if(pend.length)h+=`<span class="pill pendp">⏳ ${pend.map(p=>shortName(p.name)).join(", ")}</span>`;
   else if(av===0)h+=`<span class="pill warn">nessuno disponibile</span>`;
   h+=`</div>`;
@@ -927,17 +934,17 @@ function renderRecap(){
     return `<div class="ritem"><span class="rl"><b>${it.f.name}</b> → <span class="rpill ${pair[0]}">${pair[1]}</span></span>
       <button class="mini undo" data-ract="undoleave" data-fc="${it.f.code}" data-d="${it.d}">↩</button></div>`;
   }
-  function section(cls,label,groups,rowFn){
+  function section(cls,label,n,groups,rowFn){
     if(!groups.length)return "";
-    let s=`<div class="rsec ${cls}"><div class="rsec-h">${label}</div>`;
+    let s=`<div class="rsec ${cls}"><div class="rsec-h"><span>${label}</span><span class="rsec-n">${n}</span></div><div class="rsec-b">`;
     groups.forEach(g=>{
-      s+=`<div class="rday"><div class="rday-h">${weekday(g.d)} ${pretty(g.d)}</div>${g.items.map(rowFn).join("")}</div>`;
+      s+=`<div class="rday"><span class="rday-h">${weekday(g.d)} ${pretty(g.d)}</span>${g.items.map(rowFn).join("")}</div>`;
     });
-    return s+`</div>`;
+    return s+`</div></div>`;
   }
-  let h=`<div class="rtitle">Resoconto <span class="rcount">${cnt}</span></div>`;
-  h+=section("pend","⏳ In attesa",byDay(pend),pendRow);
-  h+=section("done","✓ Presi",byDay(done),doneRow);
+  let h=`<div class="rtitle">Resoconto</div>`;
+  h+=section("pend","⏳ In attesa",pend.length,byDay(pend),pendRow);
+  h+=section("done","✓ Presi",done.length,byDay(done),doneRow);
   box.innerHTML=h;
   box.querySelectorAll("[data-ract]").forEach(b=>b.onclick=()=>{
     const a=b.dataset.ract;
@@ -1059,7 +1066,7 @@ function addParticipantByCode(code){
 function renderSwapTables(){
   const wrap=document.getElementById("swapTables");
   function tbl(title,fn){
-    let h=`<div class="cond" style="font-weight:700;font-size:13px;margin-top:10px;color:var(--ink)">${title}</div><table class="swap"><tr><th>R</th><th>G1</th><th>G2</th><th>G3</th><th>G4</th><th>G5</th></tr>`;
+    let h=`<div class="cond" style="font-weight:700;font-size:13px;margin-top:10px;color:var(--ink)">${title}</div><table class="swap"><tr><th>R</th><th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th><th>Day 5</th></tr>`;
     for(let R=1;R<=16;R++){h+=`<tr><td class="r">${R}</td>`;for(let d=1;d<=5;d++)h+=`<td>${fn(R,d).join(" · ")}</td>`;h+="</tr>";}
     return h+"</table>";
   }
