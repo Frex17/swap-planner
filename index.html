@@ -510,6 +510,7 @@ function participants(){
   const codes=ev().participants||[];
   const out=[];
   codes.forEach(code=>{const f=memberByCode(code);if(f&&!out.some(o=>o.code===f.code))out.push({f,code:f.code});});
+  out.sort((a,b)=>a.f.roster-b.f.roster);
   return out;
 }
 function groupNames(){
@@ -753,12 +754,14 @@ async function initRosterSync(){
 }
 
 /* ---------- gruppi (nel menu) ---------- */
+function openDrawer(){const d=document.getElementById("drawer"),s=document.getElementById("scrim");if(!d)return;d.classList.add("open");s.classList.add("open");d.setAttribute("aria-hidden","false");}
+function closeDrawer(){const d=document.getElementById("drawer"),s=document.getElementById("scrim");if(!d)return;d.classList.remove("open");s.classList.remove("open");d.setAttribute("aria-hidden","true");}
 function renderGroups(){
   const gl=document.getElementById("groupList");if(!gl)return;
   gl.innerHTML=state.events.map(e=>`<button class="grow ${e.id===state.cur?'on':''}" data-g="${e.id}">
     <span class="gname">${e.name||'(senza nome)'}</span>
     <span class="gdate">${pretty(e.start)} → ${pretty(e.end)}</span></button>`).join("");
-  gl.querySelectorAll(".grow").forEach(b=>b.onclick=()=>switchEvent(b.dataset.g));
+  gl.querySelectorAll(".grow").forEach(b=>b.onclick=()=>{switchEvent(b.dataset.g);closeDrawer();window.scrollTo(0,0);});
 }
 
 /* ---------- filtri ---------- */
@@ -1049,16 +1052,16 @@ function renderPlan(){
 function renderCalib(){renderParts();}  // calibrazione interna automatica
 function renderParts(){
   const box=document.getElementById("partList");if(!box)return;
-  const codes=ev().participants||[];
-  box.innerHTML=codes.length?codes.map((code,i)=>{
+  const codes=(ev().participants||[]).slice().sort((a,b)=>((CREW_DB[a]?CREW_DB[a].roster:99)-(CREW_DB[b]?CREW_DB[b].roster:99)));
+  box.innerHTML=codes.length?codes.map((code)=>{
     const d=CREW_DB[code];
     const nm=d?d.name:code, ros=d?("R"+String(d.roster).padStart(2,"0")):'<span style="color:var(--red)">?</span>';
     return `<div class="frow"><span class="fcode">${code}</span>
       <span class="fname">${nm} <span class="frost">${ros}</span></span>
-      <button class="btn btn-danger" data-pdel="${i}">✕</button></div>`;
+      <button class="btn btn-danger" data-pdel="${code}">✕</button></div>`;
   }).join(""):`<p class="hint" style="margin:2px 0 0">Nessun partecipante. Aggiungili col crewcode qui sotto.</p>`;
   box.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
-    const e=ev();(e.participants=e.participants||[]).splice(+b.dataset.pdel,1);
+    const e=ev();e.participants=(e.participants||[]).filter(c=>c!==b.dataset.pdel);
     saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
   });
 }
@@ -1069,6 +1072,7 @@ function addParticipantByCode(code){
   const e=ev();e.participants=e.participants||[];
   if(e.participants.includes(code)){alert("Già nel gruppo.");return;}
   e.participants.push(code);
+  e.participants.sort((a,b)=>((CREW_DB[a]?CREW_DB[a].roster:99)-(CREW_DB[b]?CREW_DB[b].roster:99)));
   saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
 }
 function renderSwapTables(){
@@ -1194,12 +1198,9 @@ function init(){
   // copia resoconto
   document.getElementById("copyRecap").onclick=copyRecap;
   // drawer (menu hamburger)
-  const drawer=document.getElementById("drawer"),scrim=document.getElementById("scrim");
-  function openDrawer(){drawer.classList.add("open");scrim.classList.add("open");drawer.setAttribute("aria-hidden","false");}
-  function closeDrawer(){drawer.classList.remove("open");scrim.classList.remove("open");drawer.setAttribute("aria-hidden","true");}
   document.getElementById("hambBtn").onclick=openDrawer;
   document.getElementById("drawerX").onclick=closeDrawer;
-  scrim.onclick=closeDrawer;
+  document.getElementById("scrim").onclick=closeDrawer;
   applyTheme();
   renderCrew();renderCalib();renderSwapTables();renderFilters();renderPlan();
   initSupabase();
