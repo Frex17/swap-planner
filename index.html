@@ -331,7 +331,7 @@
     <button class="drawer-x" id="drawerX" aria-label="Chiudi">✕</button>
   </div>
   <div class="drawer-b">
-  <details class="panel" open>
+  <details class="panel" id="panelGruppi" open>
     <summary>Gruppi</summary>
     <div class="pcont">
       <div id="groupList"></div>
@@ -339,7 +339,7 @@
     </div>
   </details>
 
-  <details class="panel">
+  <details class="panel" id="panelSettings">
     <summary>Impostazioni</summary>
     <div class="pcont">
       <div class="ge-title">Gruppo selezionato: <b id="geName">—</b></div>
@@ -800,7 +800,11 @@ function renderGroups(){
     </button>
     <button class="grow-del" data-gdel="${e.id}" aria-label="Elimina gruppo" title="Elimina">🗑</button>
   </div>`).join("");
-  gl.querySelectorAll(".grow-main").forEach(b=>b.onclick=()=>{switchEvent(b.dataset.g);closeDrawer();window.scrollTo(0,0);});
+  gl.querySelectorAll(".grow-main").forEach(b=>b.onclick=()=>{
+    switchEvent(b.dataset.g);
+    const ps=document.getElementById("panelSettings");
+    if(ps){ps.open=true;try{ps.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){ps.scrollIntoView();}}
+  });
   gl.querySelectorAll(".grow-del").forEach(b=>b.onclick=ev=>{ev.stopPropagation();deleteGroup(b.dataset.gdel);});
 }
 
