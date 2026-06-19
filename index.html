@@ -639,11 +639,14 @@ function removeById(id){
 }
 async function connectEvent(){
   if(!sb)return;
+  const evId=state.cur;
   if(channel){try{await sb.removeChannel(channel);}catch(e){}}
-  const{data}=await sb.from("swap_decisions").select("*").eq("event",state.cur);
+  loadDec();   // riparti dalle decisioni LOCALI di questo gruppo (niente residui di altri gruppi)
+  const{data}=await sb.from("swap_decisions").select("*").eq("event",evId);
+  if(state.cur!==evId)return;   // l'utente ha già cambiato gruppo: non applicare dati vecchi
   (data||[]).forEach(applyRow);
   saveDec();
-  channel=sb.channel("swap_"+state.cur)
+  channel=sb.channel("swap_"+evId)
     .on("postgres_changes",{event:"*",schema:"public",table:"swap_decisions"},payload=>{
       if(payload.eventType==="DELETE"){const id=payload.old&&payload.old.id;if(!id||id.indexOf(state.cur+"|")!==0)return;removeById(id);}
       else{const r=payload.new;if(!r||r.event!==state.cur)return;applyRow(r);}
@@ -903,10 +906,12 @@ function doneItems(){
 }
 function pendingItems(){
   const out=[];
+  const dset=new Set(eventDays());           // solo i giorni di QUESTO gruppo
   for(const k in decisions){
     const v=decisions[k];
     if(v.status!=="pending")continue;
     const pk=parseDKey(k);
+    if(!dset.has(pk.day))continue;
     out.push({roster:pk.roster,name:pk.name,by:v.by||"?",d:pk.day});
   }
   out.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
