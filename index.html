@@ -486,10 +486,28 @@ function statusOf(p){
   if(p<=12)return{type:"late",day:p-7};
   return{type:"off",offType:"loff"};
 }
+/* flag flexi del partecipante (Francesco flexL = solo late, Clara flexE = solo early), letto dal roster */
+function flexFlagFor(f){
+  const list=ROSTER_PEOPLE[f.roster]||[];
+  const alias=f.code&&CREW_ALIAS[f.code];
+  for(const p of list){if(p[0]===f.name||p[0]===alias){if(p[2]==="flexE"||p[2]==="flexL")return p[2];}}
+  return null;
+}
 function statusFor(f,d){
   const lv=leaves[fid(f)+"|"+d];
   if(lv)return{type:"leave",kind:lv};
-  return statusOf(phaseOf(f.roster,d));
+  const p=phaseOf(f.roster,d);
+  const st=statusOf(p);
+  const fx=flexFlagFor(f);
+  if(fx&&(st.type==="early"||st.type==="late")){
+    // flexi: lavora 5/3 pieno come tutti, ma SEMPRE lo stesso tipo (Francesco solo late, Clara solo early).
+    // "day" è il giorno usato per il calcolo dei partner (può essere <1 sul blocco "anticipato": norm16 sistema);
+    // "dayShow" è l'indice 1..5 nel blocco, solo per l'etichetta.
+    const dayShow=(p<=4)?p+1:p-7;
+    if(fx==="flexL")return{type:"late", day:p-7, dayShow};   // i late-block partner si calcolano con fase-7
+    if(fx==="flexE")return{type:"early",day:p+1, dayShow};   // gli early-block partner con fase+1 (norm16 vale per entrambi i blocchi)
+  }
+  return st;
 }
 function partnersFor(r,st){
   let a;
@@ -970,7 +988,7 @@ function workerEntryHTML(w,d,shared){
   const pend=pendingSwapsFor(w.f.name,d);
   const av=availableCount(w.f,w.partners,w.st.type,d);
   let h=`<div class="whead"><span class="who">${w.f.name||w.f.code}</span>
-    <span class="pill ${w.st.type}">${w.st.type==='early'?'EARLY':'LATE'} Day ${w.st.day}</span>`;
+    <span class="pill ${w.st.type}">${w.st.type==='early'?'EARLY':'LATE'} Day ${w.st.dayShow!=null?w.st.dayShow:w.st.day}</span>`;
   if(pend.length)h+=`<span class="pill pendp">⏳ ${pend.map(p=>shortName(p.name)).join(", ")}</span>`;
   else if(av===0)h+=`<span class="pill warn">nessuno disponibile</span>`;
   h+=`</div>`;
