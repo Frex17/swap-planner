@@ -221,10 +221,17 @@
   .grow.on{border-color:var(--amber);background:var(--amber-bg)}
   .grow-main{flex:1 1 auto;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
     text-align:left;background:transparent;border:0;padding:9px 12px;cursor:pointer;min-width:0}
-  .grow-del{flex:0 0 auto;width:46px;border:0;border-left:1px solid var(--line);background:transparent;
+  .grow-del{flex:0 0 auto;width:44px;border:0;border-left:1px solid var(--line);background:transparent;
     color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .grow-cfg{flex:0 0 auto;width:44px;border:0;border-left:1px solid var(--line);background:transparent;
+    color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .grow-cfg.on{color:var(--amber);background:var(--amber-bg)}
   .grow-del:active{background:var(--red-bg)}
-  .grow.on .grow-del{border-left-color:rgba(217,154,43,.4)}
+  .grow.on .grow-del,.grow.on .grow-cfg{border-left-color:rgba(217,154,43,.4)}
+  .grow.editing{border-color:var(--amber);border-radius:9px 9px 0 0}
+  .gedit{border:1.5px solid var(--amber);border-top:0;border-radius:0 0 9px 9px;background:var(--card);
+    margin:-6px 0 8px;padding:12px}
+  body.dark .gedit{background:#16222F}
   .gname{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.05em;font-weight:700;font-size:15px;color:var(--ink)}
   .grow.on .gname{color:#9a6f1f}
   body.dark .grow.on .gname{color:var(--amber)}
@@ -342,26 +349,7 @@
   <details class="panel" id="panelSettings">
     <summary>Impostazioni</summary>
     <div class="pcont">
-      <div class="ge-title">Gruppo selezionato: <b id="geName">—</b></div>
-      <label class="fld">Nome gruppo</label>
-      <input type="text" id="evName">
-      <div class="row" style="margin-top:6px">
-        <div><label class="fld">Dal</label><input type="date" id="evStart"></div>
-        <div><label class="fld">Al</label><input type="date" id="evEnd"></div>
-      </div>
-      <label class="fld" style="margin-top:14px">Partecipanti al gruppo</label>
-      <p class="hint" style="margin-top:0">Aggiungi col crewcode (es. AVILXI). Sono diversi per ogni gruppo; nome e roster li conosce già l'app.</p>
-      <div id="partList"></div>
-      <div class="row" style="margin-top:6px;align-items:center">
-        <input type="text" id="newPartCode" placeholder="CREWCODE" style="text-transform:uppercase;font-family:'IBM Plex Mono',monospace">
-        <button class="btn btn-ghost" id="addPart" style="flex:0 0 auto">+ Aggiungi</button>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
-        <button class="btn btn-danger" id="delEvent">Elimina gruppo</button>
-      </div>
-
-      <label class="fld" style="margin-top:18px">Tema</label>
+      <label class="fld">Tema</label>
       <div class="seg-sm" id="themeSeg">
         <button data-theme="light">☀︎ Chiaro</button>
         <button data-theme="dark">☾ Scuro</button>
@@ -369,6 +357,7 @@
 
       <label class="fld" style="margin-top:16px">Resoconto</label>
       <button class="btn btn-ghost" id="copyRecap">⧉ Copia resoconto (per WhatsApp)</button>
+      <p class="hint" style="margin-top:10px">Per modificare un gruppo (nome, date, partecipanti) usa il pulsante ⚙ accanto al gruppo, qui sopra in “Gruppi”.</p>
     </div>
   </details>
 
@@ -791,21 +780,76 @@ function deleteGroup(id){
   if(state.cur===id)switchEvent(state.events[0].id);
   else{renderGroups();renderFilters();renderPlan();}
 }
+function groupEditorHTML(e){
+  const codes=(e.participants||[]).slice().sort((a,b)=>((CREW_DB[a]?CREW_DB[a].roster:99)-(CREW_DB[b]?CREW_DB[b].roster:99)));
+  const parts=codes.length?codes.map(code=>{
+    const d=CREW_DB[code];const nm=d?d.name:code, ros=d?("R"+String(d.roster).padStart(2,"0")):'<span style="color:var(--red)">?</span>';
+    return `<div class="frow"><span class="fcode">${code}</span><span class="fname">${nm} <span class="frost">${ros}</span></span><button class="btn btn-danger" data-pdel="${code}">✕</button></div>`;
+  }).join(""):`<p class="hint" style="margin:2px 0 0">Nessun partecipante. Aggiungili col crewcode qui sotto.</p>`;
+  return `<div class="gedit">
+    <label class="fld">Nome gruppo</label>
+    <input type="text" id="evName" value="${(e.name||"").replace(/"/g,'&quot;')}">
+    <div class="row" style="margin-top:6px">
+      <div><label class="fld">Dal</label><input type="date" id="evStart" value="${e.start||""}"></div>
+      <div><label class="fld">Al</label><input type="date" id="evEnd" value="${e.end||""}"></div>
+    </div>
+    <label class="fld" style="margin-top:12px">Partecipanti</label>
+    <p class="hint" style="margin-top:0">Aggiungi col crewcode (es. AVILXI). Nome e roster li conosce già l'app.</p>
+    <div id="partList">${parts}</div>
+    <div class="row" style="margin-top:6px;align-items:center">
+      <input type="text" id="newPartCode" placeholder="CREWCODE" style="text-transform:uppercase;font-family:'IBM Plex Mono',monospace">
+      <button class="btn btn-ghost" id="addPart" style="flex:0 0 auto">+ Aggiungi</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-ghost" id="clearEvent">Azzera scelte</button>
+    </div>
+  </div>`;
+}
+function bindGroupEditor(){
+  const nameI=document.getElementById("evName");if(!nameI)return;
+  nameI.oninput=ev2=>{
+    const e=ev();e.name=ev2.target.value;saveState();pushEvent(e);
+    document.getElementById("evLabel").textContent=e.name+" — "+pretty(e.start)+" → "+pretty(e.end);
+    const gn=document.querySelector('.grow-main[data-g="'+e.id+'"] .gname');if(gn)gn.textContent=e.name||"(senza nome)";
+  };
+  document.getElementById("evStart").onchange=ev2=>{ev().start=ev2.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
+  document.getElementById("evEnd").onchange=ev2=>{ev().end=ev2.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
+  document.getElementById("clearEvent").onclick=()=>{
+    if(!confirm("Azzerare tutte le scelte (presi, no, attese, ferie) di questo gruppo?"))return;
+    decisions={};leaves={};saveDec();clearEventRemote();renderPlan();
+  };
+  document.getElementById("partList").querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
+    const e=ev();e.participants=(e.participants||[]).filter(c=>c!==b.dataset.pdel);
+    saveState();pushEvent(e);renderFilters();renderPlan();
+  });
+  const nfc=document.getElementById("newPartCode");
+  document.getElementById("addPart").onclick=()=>{addParticipantByCode(nfc.value);nfc.value="";};
+  nfc.onkeydown=e=>{if(e.key==="Enter"){addParticipantByCode(nfc.value);nfc.value="";}};
+}
 function renderGroups(){
   const gl=document.getElementById("groupList");if(!gl)return;
-  gl.innerHTML=state.events.map(e=>`<div class="grow ${e.id===state.cur?'on':''}">
-    <button class="grow-main" data-g="${e.id}">
-      <span class="gname">${e.name||'(senza nome)'}</span>
-      <span class="gdate">${pretty(e.start)} → ${pretty(e.end)}</span>
-    </button>
-    <button class="grow-del" data-gdel="${e.id}" aria-label="Elimina gruppo" title="Elimina">🗑</button>
-  </div>`).join("");
-  gl.querySelectorAll(".grow-main").forEach(b=>b.onclick=()=>{
-    switchEvent(b.dataset.g);
-    const ps=document.getElementById("panelSettings");
-    if(ps){ps.open=true;try{ps.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){ps.scrollIntoView();}}
+  gl.innerHTML=state.events.map(e=>{
+    const open=state.ui.editGroup===e.id;
+    return `<div class="grow ${e.id===state.cur?'on':''} ${open?'editing':''}">
+      <button class="grow-main" data-g="${e.id}">
+        <span class="gname">${e.name||'(senza nome)'}</span>
+        <span class="gdate">${pretty(e.start)} → ${pretty(e.end)}</span>
+      </button>
+      <button class="grow-cfg ${open?'on':''}" data-gcfg="${e.id}" aria-label="Impostazioni gruppo" title="Impostazioni">⚙</button>
+      <button class="grow-del" data-gdel="${e.id}" aria-label="Elimina gruppo" title="Elimina">🗑</button>
+    </div>`+(open?groupEditorHTML(e):"");
+  }).join("");
+  gl.querySelectorAll(".grow-main").forEach(b=>b.onclick=()=>{switchEvent(b.dataset.g);closeDrawer();window.scrollTo(0,0);});
+  gl.querySelectorAll(".grow-del").forEach(b=>b.onclick=ev2=>{ev2.stopPropagation();deleteGroup(b.dataset.gdel);});
+  gl.querySelectorAll(".grow-cfg").forEach(b=>b.onclick=ev2=>{
+    ev2.stopPropagation();
+    const id=b.dataset.gcfg;
+    if(state.ui.editGroup===id){state.ui.editGroup=null;saveState();renderGroups();return;}
+    state.ui.editGroup=id;saveState();
+    if(state.cur!==id)switchEvent(id);   // -> renderFilters -> renderGroups mostra l'editor
+    else renderGroups();
   });
-  gl.querySelectorAll(".grow-del").forEach(b=>b.onclick=ev=>{ev.stopPropagation();deleteGroup(b.dataset.gdel);});
+  if(state.ui.editGroup&&state.events.some(e=>e.id===state.ui.editGroup))bindGroupEditor();
 }
 
 /* ---------- filtri ---------- */
@@ -842,16 +886,17 @@ function addNewEvent(){
   const today=new Date(),p=x=>String(x).padStart(2,"0");
   const t=today.getFullYear()+"-"+p(today.getMonth()+1)+"-"+p(today.getDate());
   const e={id:"ev_"+Date.now(),name:"Nuovo gruppo",start:t,end:addDays(t,4),participants:[]};
-  state.events.push(e);pushEvent(e);switchEvent(e.id);
-  const set=document.querySelector("details.panel");if(set)set.open=true;
+  state.events.push(e);pushEvent(e);
+  state.ui.editGroup=e.id;        // apri subito le impostazioni del nuovo gruppo
+  switchEvent(e.id);
   const nm=document.getElementById("evName");if(nm){nm.focus();nm.select&&nm.select();}
 }
 function fillEventInputs(){
   const e=ev();
   const gn=document.getElementById("geName");if(gn)gn.textContent=e.name||"(senza nome)";
-  document.getElementById("evName").value=e.name;
-  document.getElementById("evStart").value=e.start;
-  document.getElementById("evEnd").value=e.end;
+  const nm=document.getElementById("evName");if(nm)nm.value=e.name;
+  const s=document.getElementById("evStart");if(s)s.value=e.start;
+  const en=document.getElementById("evEnd");if(en)en.value=e.end;
 }
 
 /* ---------- rendering ---------- */
@@ -1093,22 +1138,7 @@ function renderPlan(){
 }
 
 /* ---------- impostazioni: partecipanti per gruppo ---------- */
-function renderCalib(){renderParts();}  // calibrazione interna automatica
-function renderParts(){
-  const box=document.getElementById("partList");if(!box)return;
-  const codes=(ev().participants||[]).slice().sort((a,b)=>((CREW_DB[a]?CREW_DB[a].roster:99)-(CREW_DB[b]?CREW_DB[b].roster:99)));
-  box.innerHTML=codes.length?codes.map((code)=>{
-    const d=CREW_DB[code];
-    const nm=d?d.name:code, ros=d?("R"+String(d.roster).padStart(2,"0")):'<span style="color:var(--red)">?</span>';
-    return `<div class="frow"><span class="fcode">${code}</span>
-      <span class="fname">${nm} <span class="frost">${ros}</span></span>
-      <button class="btn btn-danger" data-pdel="${code}">✕</button></div>`;
-  }).join(""):`<p class="hint" style="margin:2px 0 0">Nessun partecipante. Aggiungili col crewcode qui sotto.</p>`;
-  box.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{
-    const e=ev();e.participants=(e.participants||[]).filter(c=>c!==b.dataset.pdel);
-    saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
-  });
-}
+function renderCalib(){}  // l'editor del gruppo è inline e si rigenera con renderGroups
 function addParticipantByCode(code){
   code=(code||"").trim().toUpperCase();
   if(!code)return;
@@ -1117,7 +1147,7 @@ function addParticipantByCode(code){
   if(e.participants.includes(code)){alert("Già nel gruppo.");return;}
   e.participants.push(code);
   e.participants.sort((a,b)=>((CREW_DB[a]?CREW_DB[a].roster:99)-(CREW_DB[b]?CREW_DB[b].roster:99)));
-  saveState();pushEvent(e);renderParts();renderFilters();renderPlan();
+  saveState();pushEvent(e);renderFilters();renderPlan();
 }
 function renderSwapTables(){
   const wrap=document.getElementById("swapTables");
@@ -1212,19 +1242,7 @@ function copyRecap(){
 /* ---------- init ---------- */
 function init(){
   loadRoster();loadState();loadDec();
-  fillEventInputs();
-  document.getElementById("evName").oninput=e=>{ev().name=e.target.value;const gn=document.getElementById("geName");if(gn)gn.textContent=e.target.value||"(senza nome)";saveState();pushEvent(ev());renderFilters();renderPlan();};
-  document.getElementById("evStart").onchange=e=>{ev().start=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();renderCalib();};
-  document.getElementById("evEnd").onchange=e=>{ev().end=e.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();renderCalib();};
   document.getElementById("addEvent").onclick=addNewEvent;
-  document.getElementById("clearEvent").onclick=()=>{
-    if(!confirm("Azzerare tutte le scelte (presi, no, attese, ferie) di questo evento per tutte?"))return;
-    decisions={};leaves={};saveDec();clearEventRemote();renderPlan();
-  };
-  document.getElementById("delEvent").onclick=()=>deleteGroup(state.cur);
-  const nfc=document.getElementById("newPartCode");
-  document.getElementById("addPart").onclick=()=>{addParticipantByCode(nfc.value);nfc.value="";};
-  nfc.onkeydown=e=>{if(e.key==="Enter"){addParticipantByCode(nfc.value);nfc.value="";}};
   document.getElementById("crewReset").onclick=()=>{
     if(!confirm("Ripristinare il roster di base? Le modifiche fatte verranno perse."))return;
     ROSTER_PEOPLE=JSON.parse(JSON.stringify(ROSTER_PEOPLE_DEFAULT));crewChanged();
