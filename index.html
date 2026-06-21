@@ -725,6 +725,7 @@ function mergeEvents(rows){
     }
     const e={id:r.id,name:r.name,start:r.start_day,end:r.end_day,participants:(r.participants!=null&&r.participants!=="")?r.participants.split(","):undefined};
     const i=state.events.findIndex(x=>x.id===e.id);
+    if(i>=0&&state.ui.editGroup===e.id)return;   // stai modificando proprio questo gruppo: non sovrascrivere il tuo testo
     if(i<0){state.events.push(e);changed=true;}
     else if(JSON.stringify(state.events[i])!==JSON.stringify(e)){state.events[i]=e;changed=true;}
   });
@@ -754,7 +755,10 @@ async function initEventsSync(){
           if(!state.events.length)state.events=[Object.assign({},FIRST_EVENT)];
           if(wasCur)switchEvent(state.events[0].id);
         }else mergeEvents([payload.new]);   // gestisce sia update sia lapidi (deleted:true)
-        saveState();renderGroups();renderFilters();renderPlan();
+        saveState();
+        const editingFocused=state.ui.editGroup&&document.activeElement&&document.activeElement.id==="evName";
+        if(!editingFocused)renderGroups();   // mentre scrivi il nome non ridisegnare la lista (perderesti il focus)
+        renderFilters();renderPlan();
       }).subscribe();
   }catch(e){console.warn("Eventi non sincronizzati:",e);}
 }
@@ -823,13 +827,17 @@ function groupEditorHTML(e){
     </div>
   </div>`;
 }
+let _nameTimer=null;
 function bindGroupEditor(){
   const nameI=document.getElementById("evName");if(!nameI)return;
+  nameI.onfocus=()=>{try{nameI.select();}catch(e){}};   // al click seleziona tutto: scrivendo sostituisci "Nuovo gruppo"
   nameI.oninput=ev2=>{
-    const e=ev();e.name=ev2.target.value;saveState();pushEvent(e);
+    const e=ev();e.name=ev2.target.value;saveState();
     document.getElementById("evLabel").textContent=e.name+" — "+pretty(e.start)+" → "+pretty(e.end);
     const gn=document.querySelector('.grow-main[data-g="'+e.id+'"] .gname');if(gn)gn.textContent=e.name||"(senza nome)";
+    clearTimeout(_nameTimer);_nameTimer=setTimeout(()=>pushEvent(ev()),700);   // sul cloud solo a pausa, non a ogni lettera
   };
+  nameI.onblur=()=>{clearTimeout(_nameTimer);pushEvent(ev());};
   document.getElementById("evStart").onchange=ev2=>{ev().start=ev2.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
   document.getElementById("evEnd").onchange=ev2=>{ev().end=ev2.target.value;saveState();pushEvent(ev());renderFilters();renderPlan();};
   document.getElementById("clearEvent").onclick=()=>{
